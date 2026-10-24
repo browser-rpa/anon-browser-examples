@@ -1,0 +1,57 @@
+{
+  "id": "examples.echo",
+  "name": "Echo 示例节点",
+  "version": "0.1.0",
+  "kind": "automation",
+  "entrypoint": "bin/plugin",
+  "permissions": ["variables.read", "variables.write"],
+  "nodes": [
+    {
+      "metadata": {
+        "type": "examples.echo",
+        "version": 1,
+        "display_name": "Echo 输入",
+        "description": "把输入文本输出到当前 Run",
+        "category": "示例",
+        "security_level": "safe",
+        "idempotency": "idempotent",
+        "docs_url": "https://browser-rpa.github.io/anon-browser-docs/plugins/node-schema"
+      },
+      "schema": {
+        "version": 1,
+        "input_schema": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "type": "string",
+              "title": "输入值",
+              "description": "支持工作流变量引用"
+            }
+          },
+          "required": ["value"]
+        },
+        "output_schema": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "object",
+          "required": ["value"],
+          "properties": { "value": { "type": "string" } }
+        },
+        "ports": [
+          { "name": "in", "kind": "input" },
+          { "name": "success", "kind": "output" },
+          { "name": "error", "kind": "error" }
+        ],
+        "errors": []
+      },
+      "policy": {
+        "capabilities": ["variables.read", "variables.write"],
+        "required_permissions": ["variables.read", "variables.write"],
+        "timeouts": { "default": 10000000000, "minimum": 100000000, "maximum": 60000000000 },
+        "resources": {},
+        "max_attempts": 1
+      }
+    }
+  ]
+}
