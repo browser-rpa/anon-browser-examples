@@ -5,6 +5,7 @@
 ## 目录
 
 - `plugins/echo-node`：最小自动化插件，导出一个把输入写入输出的 RPA 节点。
+- `plugins/capability-node`：Go 编写的 capability 调用示例，演示读取页面、读写工作流变量和发起 HTTP 请求。
 - `workflows/`：按能力拆分的工作流 Graph，包括浏览器操作、标签页、变量和流程控制、会话数据、网络规则、后台观察、文件产物和临时环境。
 - `docs/capability-matrix.md`：公开节点、API 和示例文件的完整对应表。
 - `scripts/package-plugin.sh`：在本机编译并打包自动化插件。
@@ -19,7 +20,9 @@
 ## 打包并导入插件
 
 ```bash
-./scripts/package-plugin.sh
+./scripts/package-plugin.sh echo-node
+# capability 示例
+./scripts/package-plugin.sh capability-node
 ```
 
 脚本会生成 `dist/echo-node-<os>-<arch>.abp`。随后可以在桌面端“扩展中心 → 自动化插件”导入，或执行：
@@ -29,7 +32,44 @@ curl -X POST "$ANON_BROWSER_API/api/plugins/automation/import" \
   -F 'file=@dist/echo-node-darwin-arm64.abp'
 ```
 
-导入后重新打开 RPA 编辑器，节点 `examples.echo` 会出现在左侧节点库。
+导入后重新打开 RPA 编辑器，节点 `examples.echo` 或 `examples.capability.*` 会出现在左侧节点库。
+
+## Go 插件如何调用 Core 能力
+
+自动化插件是一个由 Core 启动的 Go 可执行文件。插件不直接连接 CDP、Profile
+目录或数据库，而是通过 stdin/stdout 传递 JSON。Core 先发送一次节点调用，插件
+需要能力时向 stdout 发送一条 `capability_call`，再从 stdin 读取对应的
+`capability_result`，最后发送 `ok: true` 的节点结果。
+
+例如读取当前页面标题：
+
+```json
+{"type":"capability_call","id":"call-1","capability":"browser","action":"read_title","arguments":{}}
+```
+
+Core 返回：
+
+```json
+{"type":"capability_result","id":"call-1","ok":true,"data":"页面标题"}
+```
+
+插件随后返回：
+
+```json
+{"ok":true,"result":{"next_port":"success","output":{"value":"页面标题"},"variables":{"page.title":"页面标题"}}}
+```
+
+`capability-node` 包含完整的 Go 实现。它演示了以下调用：
+
+| capability | action | 用途 |
+| --- | --- | --- |
+| `browser` | `read_title`、`read_url` | 读取当前页面 |
+| `variables` | `get`、`set` | 读取或写入当前 Run 变量 |
+| `http` | `request` | 通过 Core 发起外部 HTTP 请求 |
+
+插件必须在 Manifest 的 `permissions` 中声明对应权限，节点 Policy 的
+`required_permissions` 也必须声明同一权限；否则调用会被 Core 拒绝。详细的能力边界见
+[公开 capability 文档](https://browser-rpa.github.io/anon-browser-docs/plugins/capabilities)。
 
 ## 工作流示例
 
