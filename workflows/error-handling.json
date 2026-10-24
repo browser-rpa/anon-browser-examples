@@ -1,0 +1,32 @@
+{
+  "project_id": "local",
+  "name": "异常处理和重试示例",
+  "description": "演示 try/catch/finally 和 retry 的图结构。将 missing 变量改成真实变量后可以观察成功路径。",
+  "graph": {
+    "schema_version": 1,
+    "start_node_id": "start",
+    "nodes": [
+      { "id": "start", "type": "core.start", "version": 1, "config": {}, "ui": { "x": 40, "y": 160 } },
+      { "id": "try", "type": "flow.try", "version": 1, "config": {}, "ui": { "x": 40, "y": 160 } },
+      { "id": "body", "type": "data.get", "version": 1, "config": { "name": "missing" }, "ui": { "x": 320, "y": 40 } },
+      { "id": "catch", "type": "data.set", "version": 1, "config": { "name": "handled", "value": true }, "ui": { "x": 320, "y": 160 } },
+      { "id": "finally", "type": "data.set", "version": 1, "config": { "name": "cleaned", "value": true }, "ui": { "x": 320, "y": 280 } },
+      { "id": "retry", "type": "flow.retry", "version": 1, "config": { "max_attempts": 2, "retryable_errors": ["variable_not_found"] }, "ui": { "x": 600, "y": 160 } },
+      { "id": "retry-body", "type": "data.get", "version": 1, "config": { "name": "eventual" }, "ui": { "x": 880, "y": 80 } },
+      { "id": "end", "type": "core.end", "version": 1, "config": {}, "ui": { "x": 1160, "y": 160 } }
+    ],
+    "edges": [
+      { "from": "start", "from_port": "success", "to": "try", "to_port": "in" },
+      { "from": "try", "from_port": "body", "to": "body", "to_port": "in" },
+      { "from": "body", "from_port": "success", "to": "try", "to_port": "in" },
+      { "from": "try", "from_port": "catch", "to": "catch", "to_port": "in" },
+      { "from": "catch", "from_port": "success", "to": "try", "to_port": "in" },
+      { "from": "try", "from_port": "finally", "to": "finally", "to_port": "in" },
+      { "from": "finally", "from_port": "success", "to": "try", "to_port": "in" },
+      { "from": "try", "from_port": "done", "to": "retry", "to_port": "in" },
+      { "from": "retry", "from_port": "body", "to": "retry-body", "to_port": "in" },
+      { "from": "retry-body", "from_port": "success", "to": "retry", "to_port": "in" },
+      { "from": "retry", "from_port": "done", "to": "end", "to_port": "in" }
+    ]
+  }
+}

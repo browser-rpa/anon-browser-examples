@@ -1,0 +1,18 @@
+{
+  "project_id": "local",
+  "name": "丢弃临时环境示例",
+  "description": "一次性任务完成后丢弃临时环境，不保留浏览器数据。",
+  "graph": {
+    "schema_version": 1,
+    "start_node_id": "provision",
+    "nodes": [
+      { "id": "provision", "type": "environment.provision", "version": 1, "config": { "name": "one-shot environment", "profile_source": "new", "device_type": "macos", "language": "zh-CN", "timezone": "Asia/Shanghai", "proxy_mode": "direct", "clear_data_on_start": true }, "ui": { "x": 40, "y": 160 } },
+      { "id": "discard", "type": "environment.discard", "version": 1, "config": {}, "ui": { "x": 320, "y": 160 } },
+      { "id": "end", "type": "core.end", "version": 1, "config": {}, "ui": { "x": 600, "y": 160 } }
+    ],
+    "edges": [
+      { "from": "provision", "from_port": "success", "to": "discard", "to_port": "in" },
+      { "from": "discard", "from_port": "success", "to": "end", "to_port": "in" }
+    ]
+  }
+}

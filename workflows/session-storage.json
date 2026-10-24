@@ -1,0 +1,28 @@
+{
+  "project_id": "local",
+  "name": "Cookie 和网页存储示例",
+  "description": "使用测试值演示 Cookie、localStorage 和 sessionStorage 的写入与读取。不要提交真实凭据。",
+  "graph": {
+    "schema_version": 1,
+    "start_node_id": "open",
+    "nodes": [
+      { "id": "open", "type": "browser.open", "version": 1, "config": { "headless": false }, "ui": { "x": 40, "y": 160 } },
+      { "id": "navigate", "type": "browser.navigate", "version": 1, "config": { "url": "https://demo.example/" }, "ui": { "x": 280, "y": 160 } },
+      { "id": "cookies-set", "type": "browser.cookies_set", "version": 1, "config": { "cookies": [ { "name": "demo_session", "value": "replace-me", "url": "https://demo.example/", "path": "/", "secure": true, "same_site": "lax" } ] }, "ui": { "x": 520, "y": 160 } },
+      { "id": "storage-set", "type": "browser.storage_set", "version": 1, "config": { "origin": "https://demo.example", "storage_type": "local", "items": [ { "key": "demo_state", "value": "replace-me" } ] }, "ui": { "x": 760, "y": 160 } },
+      { "id": "cookies-get", "type": "browser.cookies_get", "version": 1, "config": { "urls": ["https://demo.example/"], "output_variable": "session.cookies" }, "ui": { "x": 1000, "y": 160 } },
+      { "id": "storage-get", "type": "browser.storage_get", "version": 1, "config": { "origin": "https://demo.example", "storage_type": "local", "keys": ["demo_state"], "output_variable": "session.storage" }, "ui": { "x": 1240, "y": 160 } },
+      { "id": "close", "type": "browser.close", "version": 1, "config": {}, "ui": { "x": 1480, "y": 160 } },
+      { "id": "end", "type": "core.end", "version": 1, "config": {}, "ui": { "x": 1720, "y": 160 } }
+    ],
+    "edges": [
+      { "from": "open", "from_port": "success", "to": "navigate", "to_port": "in" },
+      { "from": "navigate", "from_port": "success", "to": "cookies-set", "to_port": "in" },
+      { "from": "cookies-set", "from_port": "success", "to": "storage-set", "to_port": "in" },
+      { "from": "storage-set", "from_port": "success", "to": "cookies-get", "to_port": "in" },
+      { "from": "cookies-get", "from_port": "success", "to": "storage-get", "to_port": "in" },
+      { "from": "storage-get", "from_port": "success", "to": "close", "to_port": "in" },
+      { "from": "close", "from_port": "success", "to": "end", "to_port": "in" }
+    ]
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "project_id": "local",
+  "name": "变量和条件分支示例",
+  "description": "演示 data.set/data.get、延迟、条件判断和多条件分支。",
+  "graph": {
+    "schema_version": 1,
+    "start_node_id": "set",
+    "nodes": [
+      { "id": "set", "type": "data.set", "version": 1, "config": { "name": "state", "value": "ready" }, "ui": { "x": 40, "y": 180 } },
+      { "id": "get", "type": "data.get", "version": 1, "config": { "name": "state" }, "ui": { "x": 280, "y": 180 } },
+      { "id": "delay", "type": "flow.delay", "version": 1, "config": { "duration_ms": 500 }, "ui": { "x": 520, "y": 180 } },
+      { "id": "switch", "type": "flow.switch", "version": 1, "config": { "value": { "variable_ref": "state" }, "cases": ["ready", "done"] }, "ui": { "x": 760, "y": 180 } },
+      { "id": "ready", "type": "data.set", "version": 1, "config": { "name": "branch", "value": "ready-branch" }, "ui": { "x": 1040, "y": 80 } },
+      { "id": "done", "type": "data.set", "version": 1, "config": { "name": "branch", "value": "done-branch" }, "ui": { "x": 1040, "y": 180 } },
+      { "id": "default", "type": "data.set", "version": 1, "config": { "name": "branch", "value": "default-branch" }, "ui": { "x": 1040, "y": 280 } },
+      { "id": "end-ready", "type": "core.end", "version": 1, "config": {}, "ui": { "x": 1320, "y": 80 } },
+      { "id": "end-done", "type": "core.end", "version": 1, "config": {}, "ui": { "x": 1320, "y": 180 } },
+      { "id": "end-default", "type": "core.end", "version": 1, "config": {}, "ui": { "x": 1320, "y": 280 } }
+    ],
+    "edges": [
+      { "from": "set", "from_port": "success", "to": "get", "to_port": "in" },
+      { "from": "get", "from_port": "success", "to": "delay", "to_port": "in" },
+      { "from": "delay", "from_port": "success", "to": "switch", "to_port": "in" },
+      { "from": "switch", "from_port": "case_0", "to": "ready", "to_port": "in" },
+      { "from": "switch", "from_port": "case_1", "to": "done", "to_port": "in" },
+      { "from": "switch", "from_port": "default", "to": "default", "to_port": "in" },
+      { "from": "ready", "from_port": "success", "to": "end-ready", "to_port": "in" },
+      { "from": "done", "from_port": "success", "to": "end-done", "to_port": "in" },
+      { "from": "default", "from_port": "success", "to": "end-default", "to_port": "in" }
+    ]
+  }
+}

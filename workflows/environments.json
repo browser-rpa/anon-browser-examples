@@ -1,0 +1,22 @@
+{
+  "project_id": "local",
+  "name": "临时环境生命周期示例",
+  "description": "创建临时环境、启动浏览器并在任务结束时保存或丢弃。按业务选择 retain 或 discard。",
+  "graph": {
+    "schema_version": 1,
+    "start_node_id": "provision",
+    "nodes": [
+      { "id": "provision", "type": "environment.provision", "version": 1, "config": { "name": "demo temporary environment", "profile_source": "new", "device_type": "macos", "language": "zh-CN", "timezone": "Asia/Shanghai", "proxy_mode": "direct", "clear_data_on_start": true, "start_url": "https://example.com/" }, "ui": { "x": 40, "y": 160 } },
+      { "id": "open", "type": "browser.open", "version": 1, "config": { "headless": false }, "ui": { "x": 320, "y": 160 } },
+      { "id": "navigate", "type": "browser.navigate", "version": 1, "config": { "url": "https://example.com/" }, "ui": { "x": 600, "y": 160 } },
+      { "id": "retain", "type": "environment.retain", "version": 1, "config": {}, "ui": { "x": 880, "y": 160 } },
+      { "id": "end-retained", "type": "core.end", "version": 1, "config": {}, "ui": { "x": 1160, "y": 160 } }
+    ],
+    "edges": [
+      { "from": "provision", "from_port": "success", "to": "open", "to_port": "in" },
+      { "from": "open", "from_port": "success", "to": "navigate", "to_port": "in" },
+      { "from": "navigate", "from_port": "success", "to": "retain", "to_port": "in" },
+      { "from": "retain", "from_port": "success", "to": "end-retained", "to_port": "in" }
+    ]
+  }
+}

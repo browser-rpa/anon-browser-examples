@@ -1,0 +1,26 @@
+{
+  "project_id": "local",
+  "name": "后台 URL 观察示例",
+  "description": "等待当前页面地址包含指定片段。",
+  "graph": {
+    "schema_version": 1,
+    "start_node_id": "open",
+    "nodes": [
+      { "id": "open", "type": "browser.open", "version": 1, "config": { "headless": false }, "ui": { "x": 40, "y": 160 } },
+      { "id": "first", "type": "browser.navigate", "version": 1, "config": { "url": "https://example.com/start" }, "ui": { "x": 280, "y": 160 } },
+      { "id": "watch", "type": "background.start", "version": 1, "config": { "task_id": "url-watch", "operation_type": "browser.url_watch", "operation_version": 1, "operation_config": { "condition": "contains", "expected_url": "/done", "poll_interval_ms": 250, "timeout_ms": 10000 } }, "ui": { "x": 520, "y": 160 } },
+      { "id": "navigate-done", "type": "browser.navigate", "version": 1, "config": { "url": "https://example.com/done" }, "ui": { "x": 760, "y": 160 } },
+      { "id": "wait", "type": "background.wait", "version": 1, "config": { "task_id": "url-watch", "timeout_ms": 10000, "output_variable": "watch.url" }, "ui": { "x": 1000, "y": 160 } },
+      { "id": "close", "type": "browser.close", "version": 1, "config": {}, "ui": { "x": 1240, "y": 160 } },
+      { "id": "end", "type": "core.end", "version": 1, "config": {}, "ui": { "x": 1480, "y": 160 } }
+    ],
+    "edges": [
+      { "from": "open", "from_port": "success", "to": "first", "to_port": "in" },
+      { "from": "first", "from_port": "success", "to": "watch", "to_port": "in" },
+      { "from": "watch", "from_port": "success", "to": "navigate-done", "to_port": "in" },
+      { "from": "navigate-done", "from_port": "success", "to": "wait", "to_port": "in" },
+      { "from": "wait", "from_port": "success", "to": "close", "to_port": "in" },
+      { "from": "close", "from_port": "success", "to": "end", "to_port": "in" }
+    ]
+  }
+}
