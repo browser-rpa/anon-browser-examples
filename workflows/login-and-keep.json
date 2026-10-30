@@ -1,0 +1,161 @@
+{
+  "project_id": "local",
+  "name": "人工登录并保持浏览器",
+  "description": "先替换环境 ID；检测到登录状态后保存会话，任务结束不关闭浏览器。",
+  "graph": {
+    "schema_version": 3,
+    "start_node_id": "start",
+    "nodes": [
+      {
+        "id": "start",
+        "type": "core.start",
+        "version": 1,
+        "config": {},
+        "ui": {
+          "x": 40,
+          "y": 160
+        }
+      },
+      {
+        "id": "environment",
+        "type": "environment.select",
+        "version": 1,
+        "config": {
+          "environment_id": "environment-REPLACE_ME"
+        },
+        "ui": {
+          "x": 280,
+          "y": 160
+        }
+      },
+      {
+        "id": "open",
+        "type": "browser.open",
+        "version": 1,
+        "config": {
+          "headless": false
+        },
+        "ui": {
+          "x": 520,
+          "y": 160
+        }
+      },
+      {
+        "id": "login",
+        "type": "browser.navigate",
+        "version": 1,
+        "config": {
+          "url": "https://example.test/login"
+        },
+        "ui": {
+          "x": 760,
+          "y": 160
+        }
+      },
+      {
+        "id": "wait",
+        "type": "human.wait",
+        "version": 1,
+        "config": {
+          "mode": "auto",
+          "title": "请在浏览器中完成登录",
+          "timeout_ms": 600000,
+          "stable_ms": 1000,
+          "conditions": [
+            {
+              "kind": "element_visible",
+              "selector": "[data-test=logged-in]"
+            }
+          ]
+        },
+        "ui": {
+          "x": 1000,
+          "y": 160
+        }
+      },
+      {
+        "id": "keep",
+        "type": "browser.session_keep",
+        "version": 1,
+        "config": {
+          "name": "演示常驻浏览器",
+          "output_variable": "session.saved"
+        },
+        "ui": {
+          "x": 1240,
+          "y": 160
+        }
+      },
+      {
+        "id": "end",
+        "type": "core.end",
+        "version": 1,
+        "config": {},
+        "ui": {
+          "x": 1480,
+          "y": 160
+        }
+      },
+      {
+        "id": "not-confirmed",
+        "type": "core.end",
+        "version": 1,
+        "config": {},
+        "ui": {
+          "x": 1720,
+          "y": 160
+        }
+      }
+    ],
+    "edges": [
+      {
+        "from": "start",
+        "from_port": "success",
+        "to": "environment",
+        "to_port": "in"
+      },
+      {
+        "from": "environment",
+        "from_port": "success",
+        "to": "open",
+        "to_port": "in"
+      },
+      {
+        "from": "open",
+        "from_port": "success",
+        "to": "login",
+        "to_port": "in"
+      },
+      {
+        "from": "login",
+        "from_port": "success",
+        "to": "wait",
+        "to_port": "in"
+      },
+      {
+        "from": "wait",
+        "from_port": "success",
+        "to": "keep",
+        "to_port": "in"
+      },
+      {
+        "from": "keep",
+        "from_port": "success",
+        "to": "end",
+        "to_port": "in"
+      },
+      {
+        "from": "wait",
+        "from_port": "timeout",
+        "to": "not-confirmed",
+        "to_port": "in"
+      },
+      {
+        "from": "wait",
+        "from_port": "rejected",
+        "to": "not-confirmed",
+        "to_port": "in"
+      }
+    ]
+  }
+}

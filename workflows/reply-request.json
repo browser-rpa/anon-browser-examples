@@ -1,0 +1,202 @@
+{
+  "project_id": "local",
+  "name": "上报事件并等待外部回复",
+  "description": "示例固定事件需换成可信采集结果；reply_request 触发器需先配置并启用；人工确认仅演示业务核验位置。",
+  "graph": {
+    "schema_version": 3,
+    "start_node_id": "start",
+    "nodes": [
+      {
+        "id": "start",
+        "type": "core.start",
+        "version": 1,
+        "config": {},
+        "ui": {
+          "x": 40,
+          "y": 160
+        }
+      },
+      {
+        "id": "request",
+        "type": "reply.request",
+        "version": 1,
+        "config": {
+          "signal_name": "chat.reply",
+          "message_key": "example-message-1",
+          "context": {
+            "conversation_id": "example-conversation"
+          },
+          "output_variable": "reply.request"
+        },
+        "ui": {
+          "x": 280,
+          "y": 160
+        }
+      },
+      {
+        "id": "notify",
+        "type": "webhook.emit",
+        "version": 1,
+        "config": {
+          "url": "https://callback.example.invalid/messages",
+          "signing_secret": {
+            "secret_ref": "secret://callbacks/signing"
+          },
+          "body": {
+            "variable_ref": "reply.request"
+          }
+        },
+        "ui": {
+          "x": 520,
+          "y": 160
+        }
+      },
+      {
+        "id": "wait",
+        "type": "signal.wait",
+        "version": 1,
+        "config": {
+          "signal_name": "chat.reply",
+          "output_variable": "reply.receipt",
+          "fields": [
+            {
+              "name": "text",
+              "type": "string",
+              "required": true,
+              "variable": "reply.text"
+            }
+          ]
+        },
+        "ui": {
+          "x": 760,
+          "y": 160
+        }
+      },
+      {
+        "id": "confirm",
+        "type": "human.wait",
+        "version": 1,
+        "config": {
+          "mode": "manual",
+          "title": "核验业务操作结果后确认"
+        },
+        "ui": {
+          "x": 1000,
+          "y": 160
+        }
+      },
+      {
+        "id": "done",
+        "type": "signal.complete",
+        "version": 1,
+        "config": {
+          "receipt": {
+            "variable_ref": "reply.receipt"
+          },
+          "outcome": "completed"
+        },
+        "ui": {
+          "x": 1240,
+          "y": 160
+        }
+      },
+      {
+        "id": "failed",
+        "type": "signal.complete",
+        "version": 1,
+        "config": {
+          "receipt": {
+            "variable_ref": "reply.receipt"
+          },
+          "outcome": "failed"
+        },
+        "ui": {
+          "x": 1480,
+          "y": 160
+        }
+      },
+      {
+        "id": "end",
+        "type": "core.end",
+        "version": 1,
+        "config": {},
+        "ui": {
+          "x": 1720,
+          "y": 160
+        }
+      },
+      {
+        "id": "expired",
+        "type": "core.end",
+        "version": 1,
+        "config": {},
+        "ui": {
+          "x": 1960,
+          "y": 160
+        }
+      }
+    ],
+    "edges": [
+      {
+        "from": "start",
+        "from_port": "success",
+        "to": "request",
+        "to_port": "in"
+      },
+      {
+        "from": "request",
+        "from_port": "success",
+        "to": "notify",
+        "to_port": "in"
+      },
+      {
+        "from": "notify",
+        "from_port": "success",
+        "to": "wait",
+        "to_port": "in"
+      },
+      {
+        "from": "wait",
+        "from_port": "success",
+        "to": "confirm",
+        "to_port": "in"
+      },
+      {
+        "from": "confirm",
+        "from_port": "success",
+        "to": "done",
+        "to_port": "in"
+      },
+      {
+        "from": "done",
+        "from_port": "success",
+        "to": "end",
+        "to_port": "in"
+      },
+      {
+        "from": "wait",
+        "from_port": "timeout",
+        "to": "expired",
+        "to_port": "in"
+      },
+      {
+        "from": "confirm",
+        "from_port": "timeout",
+        "to": "failed",
+        "to_port": "in"
+      },
+      {
+        "from": "confirm",
+        "from_port": "rejected",
+        "to": "failed",
+        "to_port": "in"
+      },
+      {
+        "from": "failed",
+        "from_port": "success",
+        "to": "end",
+        "to_port": "in"
+      }
+    ]
+  }
+}

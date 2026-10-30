@@ -1,0 +1,115 @@
+{
+  "project_id": "local",
+  "name": "下载文件到素材库",
+  "graph": {
+    "schema_version": 3,
+    "start_node_id": "start",
+    "nodes": [
+      {
+        "id": "start",
+        "type": "core.start",
+        "version": 1,
+        "config": {},
+        "ui": {
+          "x": 40,
+          "y": 160
+        }
+      },
+      {
+        "id": "bind",
+        "type": "browser.session_bind",
+        "version": 1,
+        "config": {
+          "session_id": "session-REPLACE_ME"
+        },
+        "ui": {
+          "x": 280,
+          "y": 160
+        }
+      },
+      {
+        "id": "open",
+        "type": "browser.open",
+        "version": 1,
+        "config": {
+          "headless": false
+        },
+        "ui": {
+          "x": 520,
+          "y": 160
+        }
+      },
+      {
+        "id": "page",
+        "type": "browser.navigate",
+        "version": 1,
+        "config": {
+          "url": "https://example.test/reports"
+        },
+        "ui": {
+          "x": 760,
+          "y": 160
+        }
+      },
+      {
+        "id": "download",
+        "type": "browser.download",
+        "version": 1,
+        "config": {
+          "selector": "[data-test=download]",
+          "origin": "https://example.test",
+          "url_pattern": "https://example.test/report.csv",
+          "filename_pattern": "report*.csv",
+          "max_bytes": 33554432,
+          "output_variable": "download.files"
+        },
+        "ui": {
+          "x": 1000,
+          "y": 160
+        }
+      },
+      {
+        "id": "end",
+        "type": "core.end",
+        "version": 1,
+        "config": {},
+        "ui": {
+          "x": 1240,
+          "y": 160
+        }
+      }
+    ],
+    "edges": [
+      {
+        "from": "start",
+        "from_port": "success",
+        "to": "bind",
+        "to_port": "in"
+      },
+      {
+        "from": "bind",
+        "from_port": "success",
+        "to": "open",
+        "to_port": "in"
+      },
+      {
+        "from": "open",
+        "from_port": "success",
+        "to": "page",
+        "to_port": "in"
+      },
+      {
+        "from": "page",
+        "from_port": "success",
+        "to": "download",
+        "to_port": "in"
+      },
+      {
+        "from": "download",
+        "from_port": "success",
+        "to": "end",
+        "to_port": "in"
+      }
+    ]
+  }
+}

@@ -1,0 +1,198 @@
+{
+  "project_id": "local",
+  "name": "上传素材并核验页面结果",
+  "description": "替换素材引用、会话及站点字段；收到响应不等于业务成功。最后一个响应以 1 秒静默为收集边界。",
+  "graph": {
+    "schema_version": 3,
+    "start_node_id": "start",
+    "nodes": [
+      {
+        "id": "start",
+        "type": "core.start",
+        "version": 1,
+        "config": {},
+        "ui": {
+          "x": 40,
+          "y": 160
+        }
+      },
+      {
+        "id": "bind",
+        "type": "browser.session_bind",
+        "version": 1,
+        "config": {
+          "session_id": "session-REPLACE_ME"
+        },
+        "ui": {
+          "x": 280,
+          "y": 160
+        }
+      },
+      {
+        "id": "open",
+        "type": "browser.open",
+        "version": 1,
+        "config": {
+          "headless": false
+        },
+        "ui": {
+          "x": 520,
+          "y": 160
+        }
+      },
+      {
+        "id": "page",
+        "type": "browser.navigate",
+        "version": 1,
+        "config": {
+          "url": "https://example.test/publish"
+        },
+        "ui": {
+          "x": 760,
+          "y": 160
+        }
+      },
+      {
+        "id": "upload",
+        "type": "browser.file_upload",
+        "version": 1,
+        "config": {
+          "selector": "input[type=file]",
+          "origin": "https://example.test",
+          "files": [
+            {
+              "artifact_ref": "artifact://material-00000000000000000000000000000000"
+            }
+          ],
+          "watch": {
+            "url_pattern": "https://example.test/api/upload",
+            "method": "POST",
+            "selection": "last",
+            "quiet_ms": 1000,
+            "timeout_ms": 30000,
+            "body_mode": "json"
+          },
+          "output_variable": "upload.result",
+          "response_output_variable": "upload.response",
+          "extract": [
+            {
+              "path": "/responses/0/body/id",
+              "variable": "upload.asset_id"
+            }
+          ]
+        },
+        "ui": {
+          "x": 1000,
+          "y": 160
+        }
+      },
+      {
+        "id": "verify",
+        "type": "human.wait",
+        "version": 1,
+        "config": {
+          "mode": "auto",
+          "timeout_ms": 30000,
+          "conditions": [
+            {
+              "kind": "element_visible",
+              "selector": "[data-test=upload-complete]"
+            }
+          ]
+        },
+        "ui": {
+          "x": 1240,
+          "y": 160
+        }
+      },
+      {
+        "id": "end",
+        "type": "core.end",
+        "version": 1,
+        "config": {},
+        "ui": {
+          "x": 1480,
+          "y": 160
+        }
+      },
+      {
+        "id": "not-confirmed",
+        "type": "core.end",
+        "version": 1,
+        "config": {},
+        "ui": {
+          "x": 1720,
+          "y": 160
+        }
+      }
+    ],
+    "edges": [
+      {
+        "from": "start",
+        "from_port": "success",
+        "to": "bind",
+        "to_port": "in"
+      },
+      {
+        "from": "bind",
+        "from_port": "success",
+        "to": "open",
+        "to_port": "in"
+      },
+      {
+        "from": "open",
+        "from_port": "success",
+        "to": "page",
+        "to_port": "in"
+      },
+      {
+        "from": "page",
+        "from_port": "success",
+        "to": "upload",
+        "to_port": "in"
+      },
+      {
+        "from": "upload",
+        "from_port": "success",
+        "to": "verify",
+        "to_port": "in"
+      },
+      {
+        "from": "verify",
+        "from_port": "success",
+        "to": "end",
+        "to_port": "in"
+      },
+      {
+        "from": "upload",
+        "from_port": "timeout",
+        "to": "not-confirmed",
+        "to_port": "in"
+      },
+      {
+        "from": "upload",
+        "from_port": "failed",
+        "to": "not-confirmed",
+        "to_port": "in"
+      },
+      {
+        "from": "upload",
+        "from_port": "condition_unmet",
+        "to": "not-confirmed",
+        "to_port": "in"
+      },
+      {
+        "from": "verify",
+        "from_port": "timeout",
+        "to": "not-confirmed",
+        "to_port": "in"
+      },
+      {
+        "from": "verify",
+        "from_port": "rejected",
+        "to": "not-confirmed",
+        "to_port": "in"
+      }
+    ]
+  }
+}

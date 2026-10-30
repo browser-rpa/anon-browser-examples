@@ -3,16 +3,55 @@
   "name": "Google 搜索示例",
   "description": "使用内置节点打开 Google 首页；搜索输入可在工作流变量中继续扩展。",
   "graph": {
-    "schema_version": 1,
+    "schema_version": 3,
     "start_node_id": "start",
     "nodes": [
-      { "id": "start", "type": "core.start", "version": 1, "config": {}, "ui": { "x": 40, "y": 160 } },
-      { "id": "open-google", "type": "browser.navigate", "version": 1, "config": { "url": "https://www.google.com" }, "ui": { "x": 280, "y": 160 } },
-      { "id": "end", "type": "core.end", "version": 1, "config": {}, "ui": { "x": 560, "y": 160 } }
+      {
+        "id": "start",
+        "type": "core.start",
+        "version": 1,
+        "config": {},
+        "ui": {
+          "x": 40,
+          "y": 160
+        }
+      },
+      {
+        "id": "open-google",
+        "type": "browser.navigate",
+        "version": 1,
+        "config": {
+          "url": "https://www.google.com"
+        },
+        "ui": {
+          "x": 280,
+          "y": 160
+        }
+      },
+      {
+        "id": "end",
+        "type": "core.end",
+        "version": 1,
+        "config": {},
+        "ui": {
+          "x": 520,
+          "y": 160
+        }
+      }
     ],
     "edges": [
-      { "from": "start", "from_port": "success", "to": "open-google", "to_port": "in" },
-      { "from": "open-google", "from_port": "success", "to": "end", "to_port": "in" }
+      {
+        "from": "start",
+        "from_port": "success",
+        "to": "open-google",
+        "to_port": "in"
+      },
+      {
+        "from": "open-google",
+        "from_port": "success",
+        "to": "end",
+        "to_port": "in"
+      }
     ]
   }
 }

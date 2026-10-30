@@ -3,31 +3,189 @@
   "name": "循环和遍历示例",
   "description": "演示受控循环、数组遍历、跳出和继续。",
   "graph": {
-    "schema_version": 1,
+    "schema_version": 3,
     "start_node_id": "start",
     "nodes": [
-      { "id": "start", "type": "core.start", "version": 1, "config": {}, "ui": { "x": 40, "y": 160 } },
-      { "id": "loop", "type": "flow.loop", "version": 1, "config": { "count": 3 }, "ui": { "x": 40, "y": 160 } },
-      { "id": "loop-if", "type": "flow.if", "version": 1, "config": { "operator": "equals", "left": 1, "right": 2 }, "ui": { "x": 280, "y": 80 } },
-      { "id": "break", "type": "flow.break", "version": 1, "config": {}, "ui": { "x": 520, "y": 20 } },
-      { "id": "loop-body", "type": "data.set", "version": 1, "config": { "name": "loop.last", "value": "loop body executed" }, "ui": { "x": 520, "y": 140 } },
-      { "id": "continue", "type": "flow.continue", "version": 1, "config": {}, "ui": { "x": 760, "y": 140 } },
-      { "id": "each", "type": "flow.for_each", "version": 1, "config": { "items": ["one", "two", "three"], "item_variable": "item", "index_variable": "index" }, "ui": { "x": 520, "y": 160 } },
-      { "id": "each-body", "type": "data.set", "version": 1, "config": { "name": "last.item", "value": { "variable_ref": "item" } }, "ui": { "x": 760, "y": 80 } },
-      { "id": "end", "type": "core.end", "version": 1, "config": {}, "ui": { "x": 1000, "y": 160 } }
+      {
+        "id": "start",
+        "type": "core.start",
+        "version": 1,
+        "config": {},
+        "ui": {
+          "x": 40,
+          "y": 160
+        }
+      },
+      {
+        "id": "loop",
+        "type": "flow.loop",
+        "version": 1,
+        "config": {
+          "count": 3
+        },
+        "ui": {
+          "x": 280,
+          "y": 160
+        }
+      },
+      {
+        "id": "loop-if",
+        "type": "flow.if",
+        "version": 1,
+        "config": {
+          "left": 1,
+          "operator": "equals",
+          "right": 2
+        },
+        "ui": {
+          "x": 520,
+          "y": 160
+        }
+      },
+      {
+        "id": "break",
+        "type": "flow.break",
+        "version": 1,
+        "config": {},
+        "ui": {
+          "x": 760,
+          "y": 160
+        }
+      },
+      {
+        "id": "loop-body",
+        "type": "data.set",
+        "version": 1,
+        "config": {
+          "name": "loop.last",
+          "value": "loop body executed"
+        },
+        "ui": {
+          "x": 1000,
+          "y": 160
+        }
+      },
+      {
+        "id": "continue",
+        "type": "flow.continue",
+        "version": 1,
+        "config": {},
+        "ui": {
+          "x": 1240,
+          "y": 160
+        }
+      },
+      {
+        "id": "each",
+        "type": "flow.for_each",
+        "version": 1,
+        "config": {
+          "index_variable": "index",
+          "item_variable": "item",
+          "items": [
+            "one",
+            "two",
+            "three"
+          ]
+        },
+        "ui": {
+          "x": 1480,
+          "y": 160
+        }
+      },
+      {
+        "id": "each-body",
+        "type": "data.set",
+        "version": 1,
+        "config": {
+          "name": "last.item",
+          "value": {
+            "variable_ref": "item"
+          }
+        },
+        "ui": {
+          "x": 1720,
+          "y": 160
+        }
+      },
+      {
+        "id": "end",
+        "type": "core.end",
+        "version": 1,
+        "config": {},
+        "ui": {
+          "x": 1960,
+          "y": 160
+        }
+      }
     ],
     "edges": [
-      { "from": "start", "from_port": "success", "to": "loop", "to_port": "in" },
-      { "from": "loop", "from_port": "body", "to": "loop-if", "to_port": "in" },
-      { "from": "loop-if", "from_port": "true", "to": "break", "to_port": "in" },
-      { "from": "loop-if", "from_port": "false", "to": "loop-body", "to_port": "in" },
-      { "from": "break", "from_port": "break", "to": "loop", "to_port": "in" },
-      { "from": "loop-body", "from_port": "success", "to": "continue", "to_port": "in" },
-      { "from": "continue", "from_port": "continue", "to": "loop", "to_port": "in" },
-      { "from": "loop", "from_port": "done", "to": "each", "to_port": "in" },
-      { "from": "each", "from_port": "body", "to": "each-body", "to_port": "in" },
-      { "from": "each-body", "from_port": "success", "to": "each", "to_port": "in" },
-      { "from": "each", "from_port": "done", "to": "end", "to_port": "in" }
+      {
+        "from": "start",
+        "from_port": "success",
+        "to": "loop",
+        "to_port": "in"
+      },
+      {
+        "from": "loop",
+        "from_port": "body",
+        "to": "loop-if",
+        "to_port": "in"
+      },
+      {
+        "from": "loop-if",
+        "from_port": "true",
+        "to": "break",
+        "to_port": "in"
+      },
+      {
+        "from": "loop-if",
+        "from_port": "false",
+        "to": "loop-body",
+        "to_port": "in"
+      },
+      {
+        "from": "break",
+        "from_port": "break",
+        "to": "loop",
+        "to_port": "in"
+      },
+      {
+        "from": "loop-body",
+        "from_port": "success",
+        "to": "continue",
+        "to_port": "in"
+      },
+      {
+        "from": "continue",
+        "from_port": "continue",
+        "to": "loop",
+        "to_port": "in"
+      },
+      {
+        "from": "loop",
+        "from_port": "done",
+        "to": "each",
+        "to_port": "in"
+      },
+      {
+        "from": "each",
+        "from_port": "body",
+        "to": "each-body",
+        "to_port": "in"
+      },
+      {
+        "from": "each-body",
+        "from_port": "success",
+        "to": "each",
+        "to_port": "in"
+      },
+      {
+        "from": "each",
+        "from_port": "done",
+        "to": "end",
+        "to_port": "in"
+      }
     ]
   }
 }

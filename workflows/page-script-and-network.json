@@ -3,26 +3,192 @@
   "name": "页面脚本和请求规则示例",
   "description": "演示当前页面 JavaScript、请求放行/拦截/Header 修改/Body 替换和外部 HTTP 调用。发布与运行前需显式批准高风险能力。",
   "graph": {
-    "schema_version": 1,
+    "schema_version": 3,
     "start_node_id": "open",
     "nodes": [
-      { "id": "open", "type": "browser.open", "version": 1, "config": { "headless": false }, "ui": { "x": 40, "y": 160 } },
-      { "id": "navigate", "type": "browser.navigate", "version": 1, "config": { "url": "https://demo.example/" }, "ui": { "x": 280, "y": 160 } },
-      { "id": "evaluate", "type": "browser.evaluate", "version": 1, "config": { "expression": "document.title", "output_variable": "page.title" }, "ui": { "x": 520, "y": 160 } },
-      { "id": "rules", "type": "browser.network_rule", "version": 1, "config": { "rules": [ { "rule_id": "allow-api", "enabled": true, "url_patterns": ["https://demo.example/api/*"], "action": "allow" }, { "rule_id": "rewrite-api", "enabled": true, "url_patterns": ["https://demo.example/api/submit"], "action": "modify_headers", "headers": [ { "name": "X-Demo-Run", "value": "anon-browser" } ] }, { "rule_id": "replace-body", "enabled": false, "url_patterns": ["https://demo.example/api/submit"], "action": "replace_request_body", "body": "{\"source\":\"example\"}" } ] }, "ui": { "x": 760, "y": 160 } },
-      { "id": "callback", "type": "http.request", "version": 1, "config": { "method": "POST", "url": "https://httpbin.org/post", "headers": [ { "name": "Content-Type", "value": "application/json" } ], "body_mode": "json", "body": { "workflow": "page-script-and-network", "title": { "variable_ref": "page.title" } }, "response_storage": "plain", "output_variable": "callback.response" }, "ui": { "x": 1000, "y": 160 } },
-      { "id": "clear", "type": "browser.network_clear", "version": 1, "config": {}, "ui": { "x": 1240, "y": 160 } },
-      { "id": "close", "type": "browser.close", "version": 1, "config": {}, "ui": { "x": 1480, "y": 160 } },
-      { "id": "end", "type": "core.end", "version": 1, "config": {}, "ui": { "x": 1720, "y": 160 } }
+      {
+        "id": "open",
+        "type": "browser.open",
+        "version": 1,
+        "config": {
+          "headless": false
+        },
+        "ui": {
+          "x": 40,
+          "y": 160
+        }
+      },
+      {
+        "id": "navigate",
+        "type": "browser.navigate",
+        "version": 1,
+        "config": {
+          "url": "https://demo.example/"
+        },
+        "ui": {
+          "x": 280,
+          "y": 160
+        }
+      },
+      {
+        "id": "evaluate",
+        "type": "browser.evaluate",
+        "version": 1,
+        "config": {
+          "expression": "document.title",
+          "output_variable": "page.title"
+        },
+        "ui": {
+          "x": 520,
+          "y": 160
+        }
+      },
+      {
+        "id": "rules",
+        "type": "browser.network_rule",
+        "version": 1,
+        "config": {
+          "rules": [
+            {
+              "action": "allow",
+              "enabled": true,
+              "rule_id": "allow-api",
+              "url_patterns": [
+                "https://demo.example/api/*"
+              ]
+            },
+            {
+              "action": "modify_headers",
+              "enabled": true,
+              "headers": [
+                {
+                  "name": "X-Demo-Run",
+                  "value": "anon-browser"
+                }
+              ],
+              "rule_id": "rewrite-api",
+              "url_patterns": [
+                "https://demo.example/api/submit"
+              ]
+            },
+            {
+              "action": "replace_request_body",
+              "body": "{\"source\":\"example\"}",
+              "enabled": false,
+              "rule_id": "replace-body",
+              "url_patterns": [
+                "https://demo.example/api/submit"
+              ]
+            }
+          ]
+        },
+        "ui": {
+          "x": 760,
+          "y": 160
+        }
+      },
+      {
+        "id": "callback",
+        "type": "http.request",
+        "version": 1,
+        "config": {
+          "body": {
+            "title": {
+              "variable_ref": "page.title"
+            },
+            "workflow": "page-script-and-network"
+          },
+          "body_mode": "json",
+          "headers": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "method": "POST",
+          "output_variable": "callback.response",
+          "response_storage": "plain",
+          "url": "https://httpbin.org/post"
+        },
+        "ui": {
+          "x": 1000,
+          "y": 160
+        }
+      },
+      {
+        "id": "clear",
+        "type": "browser.network_clear",
+        "version": 1,
+        "config": {},
+        "ui": {
+          "x": 1240,
+          "y": 160
+        }
+      },
+      {
+        "id": "close",
+        "type": "browser.close",
+        "version": 1,
+        "config": {},
+        "ui": {
+          "x": 1480,
+          "y": 160
+        }
+      },
+      {
+        "id": "end",
+        "type": "core.end",
+        "version": 1,
+        "config": {},
+        "ui": {
+          "x": 1720,
+          "y": 160
+        }
+      }
     ],
     "edges": [
-      { "from": "open", "from_port": "success", "to": "navigate", "to_port": "in" },
-      { "from": "navigate", "from_port": "success", "to": "evaluate", "to_port": "in" },
-      { "from": "evaluate", "from_port": "success", "to": "rules", "to_port": "in" },
-      { "from": "rules", "from_port": "success", "to": "callback", "to_port": "in" },
-      { "from": "callback", "from_port": "success", "to": "clear", "to_port": "in" },
-      { "from": "clear", "from_port": "success", "to": "close", "to_port": "in" },
-      { "from": "close", "from_port": "success", "to": "end", "to_port": "in" }
+      {
+        "from": "open",
+        "from_port": "success",
+        "to": "navigate",
+        "to_port": "in"
+      },
+      {
+        "from": "navigate",
+        "from_port": "success",
+        "to": "evaluate",
+        "to_port": "in"
+      },
+      {
+        "from": "evaluate",
+        "from_port": "success",
+        "to": "rules",
+        "to_port": "in"
+      },
+      {
+        "from": "rules",
+        "from_port": "success",
+        "to": "callback",
+        "to_port": "in"
+      },
+      {
+        "from": "callback",
+        "from_port": "success",
+        "to": "clear",
+        "to_port": "in"
+      },
+      {
+        "from": "clear",
+        "from_port": "success",
+        "to": "close",
+        "to_port": "in"
+      },
+      {
+        "from": "close",
+        "from_port": "success",
+        "to": "end",
+        "to_port": "in"
+      }
     ]
   }
 }

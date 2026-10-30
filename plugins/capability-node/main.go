@@ -1,125 +1,119 @@
-// Command plugin demonstrating the interactive anon-browser capability
-// protocol. The executable itself is written in Go; Core remains responsible
-// for browser, variable and network operations.
+// All wire types, response correlation and IO limits come from the public SDK.
 package main
 
 import (
-	"bufio"
+	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
-	"io"
 	"os"
+	"time"
+
+	sdk "github.com/browser-rpa/anon-browser-sdk/plugin"
 )
 
-type invocation struct {
-	NodeType string         `json:"node_type"`
-	Input    map[string]any `json:"input"`
-}
+const prefix = "examples.capability."
 
-type capabilityCall struct {
-	Type       string         `json:"type"`
-	ID         string         `json:"id"`
-	Capability string         `json:"capability"`
-	Action     string         `json:"action"`
-	Arguments  map[string]any `json:"arguments,omitempty"`
-}
+var actions = []string{"page_title", "page_url", "variable_get", "variable_set", "http_request"}
 
-type capabilityResult struct {
-	Type  string `json:"type"`
-	ID    string `json:"id"`
-	OK    bool   `json:"ok"`
-	Data  any    `json:"data,omitempty"`
-	Error string `json:"error,omitempty"`
-}
-
-type nodeResult struct {
-	OK     bool `json:"ok"`
-	Result *struct {
-		Output    map[string]any `json:"output,omitempty"`
-		Variables map[string]any `json:"variables,omitempty"`
-		NextPort  string         `json:"next_port"`
-	} `json:"result,omitempty"`
-	Error string `json:"error,omitempty"`
-}
-
-func main() {
-	decoder := json.NewDecoder(bufio.NewReader(os.Stdin))
-	encoder := json.NewEncoder(os.Stdout)
-	var request invocation
-	if err := decoder.Decode(&request); err != nil {
-		writeError(encoder, fmt.Errorf("decode invocation: %w", err))
-		return
+func manifest() (sdk.Manifest, error) {
+	manifest := sdk.Manifest{ID: "examples.capability", Name: "Capability 调用示例", Version: "0.2.0", Kind: sdk.KindAutomation, Entrypoint: "bin/plugin", Permissions: []string{sdk.PermissionBrowserRead, sdk.PermissionVariablesRead, sdk.PermissionVariablesWrite, sdk.PermissionNetworkFetch}}
+	for _, action := range actions {
+		properties := map[string]sdk.Schema{"output_variable": sdk.String("保存到变量")}
+		var required []string
+		permission := sdk.PermissionBrowserRead
+		security, idempotency := "sensitive", "idempotent"
+		resources := sdk.NodeResources{}
+		switch action {
+		case "page_title", "page_url":
+			resources = sdk.NodeResources{ProfileLease: true, Runtime: true, ActivePage: true}
+		case "variable_get", "variable_set":
+			properties["name"] = sdk.String("变量名")
+			required = []string{"name"}
+			permission = sdk.PermissionVariablesRead
+			if action == "variable_set" {
+				properties["value"] = sdk.Schema{Title: "变量值"}
+				required = append(required, "value")
+				permission = sdk.PermissionVariablesWrite
+			}
+		case "http_request":
+			properties["method"] = sdk.Schema{Type: "string", Title: "请求方法", Enum: []string{"GET", "POST", "PUT", "PATCH", "DELETE"}}
+			properties["url"] = sdk.String("接口地址")
+			properties["headers"] = sdk.Schema{Type: "object"}
+			properties["body"] = sdk.Schema{}
+			required = []string{"method", "url"}
+			permission = sdk.PermissionNetworkFetch
+			security = "high_risk"
+			idempotency = "non_idempotent"
+		}
+		permissions := []string{permission}
+		// Every node supports output_variable, so returning variables requires
+		// a write grant even when its primary operation only reads data.
+		if permission != sdk.PermissionVariablesWrite {
+			permissions = append(permissions, sdk.PermissionVariablesWrite)
+		}
+		node, err := sdk.Describe(sdk.NodeMetadata{Type: prefix + action, Version: 1, DisplayName: action + "（插件）", Category: "插件示例", Description: "通过宿主授权能力调用，不直连浏览器", SecurityLevel: security, Idempotency: idempotency},
+			sdk.Object(properties, required...), sdk.Object(map[string]sdk.Schema{"value": {}}),
+			sdk.NodePolicy{RequiredPermissions: permissions, Capabilities: permissions, Resources: resources, Timeouts: sdk.NodeTimeout{Default: 10 * time.Second, Minimum: 100 * time.Millisecond, Maximum: time.Minute}, MaxAttempts: 1})
+		if err != nil {
+			return sdk.Manifest{}, err
+		}
+		manifest.Nodes = append(manifest.Nodes, node)
 	}
-
-	var result any
+	return manifest, nil
+}
+func handle(ctx context.Context, call sdk.NodeCall) (sdk.NodeResult, error) {
+	var value any
 	var err error
-	switch request.NodeType {
-	case "examples.capability.page_title":
-		result, err = call(encoder, decoder, "browser", "read_title", nil)
-	case "examples.capability.page_url":
-		result, err = call(encoder, decoder, "browser", "read_url", nil)
-	case "examples.capability.variable_get":
-		result, err = call(encoder, decoder, "variables", "get", map[string]any{"name": request.Input["name"]})
-	case "examples.capability.variable_set":
-		result, err = call(encoder, decoder, "variables", "set", map[string]any{
-			"name":  request.Input["name"],
-			"value": request.Input["value"],
-		})
-	case "examples.capability.http_request":
-		result, err = call(encoder, decoder, "http", "request", map[string]any{
-			"method":  request.Input["method"],
-			"url":     request.Input["url"],
-			"headers": request.Input["headers"],
-			"body":    request.Input["body"],
-		})
+	switch call.Invocation.NodeType {
+	case prefix + "page_title":
+		value, err = call.Client.ReadTitle(ctx)
+	case prefix + "page_url":
+		value, err = call.Client.ReadURL(ctx)
+	case prefix + "variable_get":
+		value, err = call.Client.GetVariable(ctx, call.String("name"))
+	case prefix + "variable_set":
+		err = call.Client.SetVariable(ctx, call.String("name"), call.Invocation.Input["value"])
+	case prefix + "http_request":
+		var request sdk.HTTPRequest
+		if err = call.DecodeInput(&request); err == nil {
+			value, err = call.Client.HTTPRequest(ctx, request)
+		}
 	default:
-		err = fmt.Errorf("unsupported node type %q", request.NodeType)
+		return sdk.NodeResult{}, fmt.Errorf("unsupported node %q", call.Invocation.NodeType)
 	}
 	if err != nil {
-		writeError(encoder, err)
-		return
+		return sdk.NodeResult{}, err
 	}
-
-	output := map[string]any{"value": result}
-	variables := map[string]any{}
-	if name, ok := request.Input["output_variable"].(string); ok && name != "" {
-		variables[name] = result
+	result := sdk.NodeResult{NextPort: "success", Output: map[string]any{"value": value}}
+	if output := call.String("output_variable"); output != "" {
+		result.Variables = map[string]any{output: value}
 	}
-	writeResult(encoder, output, variables)
+	return result, nil
 }
-
-func call(encoder *json.Encoder, decoder *json.Decoder, capability, action string, arguments map[string]any) (any, error) {
-	if err := encoder.Encode(capabilityCall{Type: "capability_call", ID: "call-1", Capability: capability, Action: action, Arguments: arguments}); err != nil {
-		return nil, fmt.Errorf("send capability call: %w", err)
+func run() error {
+	manifest, err := manifest()
+	if err != nil {
+		return err
 	}
-	var response capabilityResult
-	if err := decoder.Decode(&response); err != nil {
-		return nil, fmt.Errorf("decode capability result: %w", err)
+	if err := manifest.Validate(); err != nil {
+		return err
 	}
-	if response.Type != "capability_result" || response.ID != "call-1" {
-		return nil, errors.New("invalid capability result")
+	if len(os.Args) == 2 && os.Args[1] == "--manifest" {
+		encoder := json.NewEncoder(os.Stdout)
+		encoder.SetIndent("", "  ")
+		return encoder.Encode(manifest)
 	}
-	if !response.OK {
-		if response.Error == "" {
-			response.Error = "capability call failed"
+	server := sdk.NewServer()
+	for _, node := range manifest.Nodes {
+		if err = server.Register(node.Metadata.Type, node.Metadata.Version, handle); err != nil {
+			return err
 		}
-		return nil, errors.New(response.Error)
 	}
-	return response.Data, nil
+	return server.Serve(context.Background(), os.Stdin, os.Stdout)
 }
-
-func writeResult(encoder *json.Encoder, output, variables map[string]any) {
-	_ = encoder.Encode(nodeResult{OK: true, Result: &struct {
-		Output    map[string]any `json:"output,omitempty"`
-		Variables map[string]any `json:"variables,omitempty"`
-		NextPort  string         `json:"next_port"`
-	}{Output: output, Variables: variables, NextPort: "success"}})
-}
-
-func writeError(encoder *json.Encoder, err error) {
-	if err == nil {
-		err = io.ErrUnexpectedEOF
+func main() {
+	if err := run(); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
 	}
-	_ = encoder.Encode(nodeResult{OK: false, Error: err.Error()})
 }

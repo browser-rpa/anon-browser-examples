@@ -3,22 +3,117 @@
   "name": "停止后台任务示例",
   "description": "启动一个长时间观察任务后主动停止它。",
   "graph": {
-    "schema_version": 1,
+    "schema_version": 3,
     "start_node_id": "open",
     "nodes": [
-      { "id": "open", "type": "browser.open", "version": 1, "config": { "headless": false }, "ui": { "x": 40, "y": 160 } },
-      { "id": "navigate", "type": "browser.navigate", "version": 1, "config": { "url": "https://example.com/" }, "ui": { "x": 280, "y": 160 } },
-      { "id": "watch", "type": "background.start", "version": 1, "config": { "task_id": "long-watch", "operation_type": "browser.element_watch", "operation_version": 1, "operation_config": { "selector": "#never-appears", "condition": "appeared", "poll_interval_ms": 500, "timeout_ms": 60000 } }, "ui": { "x": 520, "y": 160 } },
-      { "id": "stop", "type": "background.stop", "version": 1, "config": { "task_id": "long-watch" }, "ui": { "x": 760, "y": 160 } },
-      { "id": "close", "type": "browser.close", "version": 1, "config": {}, "ui": { "x": 1000, "y": 160 } },
-      { "id": "end", "type": "core.end", "version": 1, "config": {}, "ui": { "x": 1240, "y": 160 } }
+      {
+        "id": "open",
+        "type": "browser.open",
+        "version": 1,
+        "config": {
+          "headless": false
+        },
+        "ui": {
+          "x": 40,
+          "y": 160
+        }
+      },
+      {
+        "id": "navigate",
+        "type": "browser.navigate",
+        "version": 1,
+        "config": {
+          "url": "https://example.com/"
+        },
+        "ui": {
+          "x": 280,
+          "y": 160
+        }
+      },
+      {
+        "id": "watch",
+        "type": "background.start",
+        "version": 1,
+        "config": {
+          "operation_config": {
+            "condition": "appeared",
+            "poll_interval_ms": 500,
+            "selector": "#never-appears",
+            "timeout_ms": 60000
+          },
+          "operation_type": "browser.element_watch",
+          "operation_version": 1,
+          "task_id": "long-watch"
+        },
+        "ui": {
+          "x": 520,
+          "y": 160
+        }
+      },
+      {
+        "id": "stop",
+        "type": "background.stop",
+        "version": 1,
+        "config": {
+          "task_id": "long-watch"
+        },
+        "ui": {
+          "x": 760,
+          "y": 160
+        }
+      },
+      {
+        "id": "close",
+        "type": "browser.close",
+        "version": 1,
+        "config": {},
+        "ui": {
+          "x": 1000,
+          "y": 160
+        }
+      },
+      {
+        "id": "end",
+        "type": "core.end",
+        "version": 1,
+        "config": {},
+        "ui": {
+          "x": 1240,
+          "y": 160
+        }
+      }
     ],
     "edges": [
-      { "from": "open", "from_port": "success", "to": "navigate", "to_port": "in" },
-      { "from": "navigate", "from_port": "success", "to": "watch", "to_port": "in" },
-      { "from": "watch", "from_port": "success", "to": "stop", "to_port": "in" },
-      { "from": "stop", "from_port": "success", "to": "close", "to_port": "in" },
-      { "from": "close", "from_port": "success", "to": "end", "to_port": "in" }
+      {
+        "from": "open",
+        "from_port": "success",
+        "to": "navigate",
+        "to_port": "in"
+      },
+      {
+        "from": "navigate",
+        "from_port": "success",
+        "to": "watch",
+        "to_port": "in"
+      },
+      {
+        "from": "watch",
+        "from_port": "success",
+        "to": "stop",
+        "to_port": "in"
+      },
+      {
+        "from": "stop",
+        "from_port": "success",
+        "to": "close",
+        "to_port": "in"
+      },
+      {
+        "from": "close",
+        "from_port": "success",
+        "to": "end",
+        "to_port": "in"
+      }
     ]
   }
 }

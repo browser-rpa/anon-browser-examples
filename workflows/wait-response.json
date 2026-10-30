@@ -1,0 +1,148 @@
+{
+  "project_id": "local",
+  "name": "执行动作并等待接口响应",
+  "graph": {
+    "schema_version": 3,
+    "start_node_id": "start",
+    "nodes": [
+      {
+        "id": "start",
+        "type": "core.start",
+        "version": 1,
+        "config": {},
+        "ui": {
+          "x": 40,
+          "y": 160
+        }
+      },
+      {
+        "id": "bind",
+        "type": "browser.session_bind",
+        "version": 1,
+        "config": {
+          "session_id": "session-REPLACE_ME"
+        },
+        "ui": {
+          "x": 280,
+          "y": 160
+        }
+      },
+      {
+        "id": "open",
+        "type": "browser.open",
+        "version": 1,
+        "config": {
+          "headless": false
+        },
+        "ui": {
+          "x": 520,
+          "y": 160
+        }
+      },
+      {
+        "id": "page",
+        "type": "browser.navigate",
+        "version": 1,
+        "config": {
+          "url": "https://example.test/workspace"
+        },
+        "ui": {
+          "x": 760,
+          "y": 160
+        }
+      },
+      {
+        "id": "response",
+        "type": "browser.wait_for_response",
+        "version": 1,
+        "config": {
+          "watch": {
+            "url_pattern": "https://example.test/api/content",
+            "method": "GET",
+            "selection": "first",
+            "body_mode": "json"
+          },
+          "action": {
+            "action": "click",
+            "selector": "[data-test=load]"
+          },
+          "output_variable": "network.response"
+        },
+        "ui": {
+          "x": 1000,
+          "y": 160
+        }
+      },
+      {
+        "id": "end",
+        "type": "core.end",
+        "version": 1,
+        "config": {},
+        "ui": {
+          "x": 1240,
+          "y": 160
+        }
+      },
+      {
+        "id": "not-confirmed",
+        "type": "core.end",
+        "version": 1,
+        "config": {},
+        "ui": {
+          "x": 1480,
+          "y": 160
+        }
+      }
+    ],
+    "edges": [
+      {
+        "from": "start",
+        "from_port": "success",
+        "to": "bind",
+        "to_port": "in"
+      },
+      {
+        "from": "bind",
+        "from_port": "success",
+        "to": "open",
+        "to_port": "in"
+      },
+      {
+        "from": "open",
+        "from_port": "success",
+        "to": "page",
+        "to_port": "in"
+      },
+      {
+        "from": "page",
+        "from_port": "success",
+        "to": "response",
+        "to_port": "in"
+      },
+      {
+        "from": "response",
+        "from_port": "success",
+        "to": "end",
+        "to_port": "in"
+      },
+      {
+        "from": "response",
+        "from_port": "timeout",
+        "to": "not-confirmed",
+        "to_port": "in"
+      },
+      {
+        "from": "response",
+        "from_port": "failed",
+        "to": "not-confirmed",
+        "to_port": "in"
+      },
+      {
+        "from": "response",
+        "from_port": "condition_unmet",
+        "to": "not-confirmed",
+        "to_port": "in"
+      }
+    ]
+  }
+}

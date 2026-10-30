@@ -1,0 +1,144 @@
+{
+  "project_id": "local",
+  "name": "同一子流程调用两次",
+  "graph": {
+    "schema_version": 3,
+    "start_node_id": "start",
+    "nodes": [
+      {
+        "id": "start",
+        "type": "core.start",
+        "version": 1,
+        "config": {},
+        "ui": {
+          "x": 40,
+          "y": 160
+        }
+      },
+      {
+        "id": "first",
+        "type": "flow.call",
+        "version": 1,
+        "config": {
+          "subflow_id": "prepare",
+          "outputs": {
+            "status": "first.status"
+          }
+        },
+        "ui": {
+          "x": 280,
+          "y": 160
+        }
+      },
+      {
+        "id": "again",
+        "type": "flow.call",
+        "version": 1,
+        "config": {
+          "subflow_id": "prepare",
+          "outputs": {
+            "status": "again.status"
+          }
+        },
+        "ui": {
+          "x": 520,
+          "y": 160
+        }
+      },
+      {
+        "id": "end",
+        "type": "core.end",
+        "version": 1,
+        "config": {},
+        "ui": {
+          "x": 760,
+          "y": 160
+        }
+      }
+    ],
+    "edges": [
+      {
+        "from": "start",
+        "from_port": "success",
+        "to": "first",
+        "to_port": "in"
+      },
+      {
+        "from": "first",
+        "from_port": "success",
+        "to": "again",
+        "to_port": "in"
+      },
+      {
+        "from": "again",
+        "from_port": "success",
+        "to": "end",
+        "to_port": "in"
+      }
+    ],
+    "subflows": [
+      {
+        "id": "prepare",
+        "name": "准备步骤",
+        "graph": {
+          "schema_version": 3,
+          "start_node_id": "start",
+          "nodes": [
+            {
+              "id": "start",
+              "type": "core.start",
+              "version": 1,
+              "config": {},
+              "ui": {
+                "x": 40,
+                "y": 160
+              }
+            },
+            {
+              "id": "set",
+              "type": "data.set",
+              "version": 1,
+              "config": {
+                "name": "result",
+                "value": "ready"
+              },
+              "ui": {
+                "x": 280,
+                "y": 160
+              }
+            },
+            {
+              "id": "end",
+              "type": "core.end",
+              "version": 1,
+              "config": {},
+              "ui": {
+                "x": 520,
+                "y": 160
+              }
+            }
+          ],
+          "edges": [
+            {
+              "from": "start",
+              "from_port": "success",
+              "to": "set",
+              "to_port": "in"
+            },
+            {
+              "from": "set",
+              "from_port": "success",
+              "to": "end",
+              "to_port": "in"
+            }
+          ],
+          "return_values": {
+            "status": {
+              "variable_ref": "result"
+            }
+          }
+        }
+      }
+    ]
+  }
+}

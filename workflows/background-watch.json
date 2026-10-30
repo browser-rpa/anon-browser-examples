@@ -3,24 +3,138 @@
   "name": "后台页面观察示例",
   "description": "启动后台元素观察，在页面中制造元素后等待结果。当前公开能力不包含 WebSocket 监听。",
   "graph": {
-    "schema_version": 1,
+    "schema_version": 3,
     "start_node_id": "open",
     "nodes": [
-      { "id": "open", "type": "browser.open", "version": 1, "config": { "headless": false }, "ui": { "x": 40, "y": 160 } },
-      { "id": "navigate", "type": "browser.navigate", "version": 1, "config": { "url": "https://demo.example/" }, "ui": { "x": 280, "y": 160 } },
-      { "id": "watch", "type": "background.start", "version": 1, "config": { "task_id": "status-watch", "operation_type": "browser.element_watch", "operation_version": 1, "operation_config": { "selector": "#async-status", "condition": "appeared", "poll_interval_ms": 250, "timeout_ms": 10000 } }, "ui": { "x": 520, "y": 160 } },
-      { "id": "trigger", "type": "browser.evaluate", "version": 1, "config": { "expression": "(() => { const el = document.createElement('div'); el.id = 'async-status'; el.textContent = 'ready'; document.body.appendChild(el); return true })()", "output_variable": "triggered" }, "ui": { "x": 760, "y": 160 } },
-      { "id": "wait", "type": "background.wait", "version": 1, "config": { "task_id": "status-watch", "timeout_ms": 10000, "output_variable": "watch.result" }, "ui": { "x": 1000, "y": 160 } },
-      { "id": "close", "type": "browser.close", "version": 1, "config": {}, "ui": { "x": 1240, "y": 160 } },
-      { "id": "end", "type": "core.end", "version": 1, "config": {}, "ui": { "x": 1480, "y": 160 } }
+      {
+        "id": "open",
+        "type": "browser.open",
+        "version": 1,
+        "config": {
+          "headless": false
+        },
+        "ui": {
+          "x": 40,
+          "y": 160
+        }
+      },
+      {
+        "id": "navigate",
+        "type": "browser.navigate",
+        "version": 1,
+        "config": {
+          "url": "https://demo.example/"
+        },
+        "ui": {
+          "x": 280,
+          "y": 160
+        }
+      },
+      {
+        "id": "watch",
+        "type": "background.start",
+        "version": 1,
+        "config": {
+          "operation_config": {
+            "condition": "appeared",
+            "poll_interval_ms": 250,
+            "selector": "#async-status",
+            "timeout_ms": 10000
+          },
+          "operation_type": "browser.element_watch",
+          "operation_version": 1,
+          "task_id": "status-watch"
+        },
+        "ui": {
+          "x": 520,
+          "y": 160
+        }
+      },
+      {
+        "id": "trigger",
+        "type": "browser.evaluate",
+        "version": 1,
+        "config": {
+          "expression": "(() =\u003e { const el = document.createElement('div'); el.id = 'async-status'; el.textContent = 'ready'; document.body.appendChild(el); return true })()",
+          "output_variable": "triggered"
+        },
+        "ui": {
+          "x": 760,
+          "y": 160
+        }
+      },
+      {
+        "id": "wait",
+        "type": "background.wait",
+        "version": 1,
+        "config": {
+          "output_variable": "watch.result",
+          "task_id": "status-watch",
+          "timeout_ms": 10000
+        },
+        "ui": {
+          "x": 1000,
+          "y": 160
+        }
+      },
+      {
+        "id": "close",
+        "type": "browser.close",
+        "version": 1,
+        "config": {},
+        "ui": {
+          "x": 1240,
+          "y": 160
+        }
+      },
+      {
+        "id": "end",
+        "type": "core.end",
+        "version": 1,
+        "config": {},
+        "ui": {
+          "x": 1480,
+          "y": 160
+        }
+      }
     ],
     "edges": [
-      { "from": "open", "from_port": "success", "to": "navigate", "to_port": "in" },
-      { "from": "navigate", "from_port": "success", "to": "watch", "to_port": "in" },
-      { "from": "watch", "from_port": "success", "to": "trigger", "to_port": "in" },
-      { "from": "trigger", "from_port": "success", "to": "wait", "to_port": "in" },
-      { "from": "wait", "from_port": "success", "to": "close", "to_port": "in" },
-      { "from": "close", "from_port": "success", "to": "end", "to_port": "in" }
+      {
+        "from": "open",
+        "from_port": "success",
+        "to": "navigate",
+        "to_port": "in"
+      },
+      {
+        "from": "navigate",
+        "from_port": "success",
+        "to": "watch",
+        "to_port": "in"
+      },
+      {
+        "from": "watch",
+        "from_port": "success",
+        "to": "trigger",
+        "to_port": "in"
+      },
+      {
+        "from": "trigger",
+        "from_port": "success",
+        "to": "wait",
+        "to_port": "in"
+      },
+      {
+        "from": "wait",
+        "from_port": "success",
+        "to": "close",
+        "to_port": "in"
+      },
+      {
+        "from": "close",
+        "from_port": "success",
+        "to": "end",
+        "to_port": "in"
+      }
     ]
   }
 }

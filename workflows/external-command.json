@@ -1,0 +1,157 @@
+{
+  "project_id": "local",
+  "name": "等待外部指令并确认处理",
+  "description": "signal_run 入口绑定该运行；这里只演示领取和确认，不假装已完成站点发送。",
+  "graph": {
+    "schema_version": 3,
+    "start_node_id": "start",
+    "nodes": [
+      {
+        "id": "start",
+        "type": "core.start",
+        "version": 1,
+        "config": {},
+        "ui": {
+          "x": 40,
+          "y": 160
+        }
+      },
+      {
+        "id": "wait",
+        "type": "signal.wait",
+        "version": 1,
+        "config": {
+          "signal_name": "chat.reply",
+          "output_variable": "command.receipt",
+          "timeout_ms": 600000,
+          "fields": [
+            {
+              "name": "text",
+              "type": "string",
+              "required": true,
+              "variable": "command.text"
+            }
+          ]
+        },
+        "ui": {
+          "x": 280,
+          "y": 160
+        }
+      },
+      {
+        "id": "confirm",
+        "type": "human.wait",
+        "version": 1,
+        "config": {
+          "mode": "manual",
+          "title": "完成实际业务操作并核验结果后确认",
+          "timeout_ms": 300000
+        },
+        "ui": {
+          "x": 520,
+          "y": 160
+        }
+      },
+      {
+        "id": "done",
+        "type": "signal.complete",
+        "version": 1,
+        "config": {
+          "receipt": {
+            "variable_ref": "command.receipt"
+          },
+          "outcome": "completed"
+        },
+        "ui": {
+          "x": 760,
+          "y": 160
+        }
+      },
+      {
+        "id": "failed",
+        "type": "signal.complete",
+        "version": 1,
+        "config": {
+          "receipt": {
+            "variable_ref": "command.receipt"
+          },
+          "outcome": "failed"
+        },
+        "ui": {
+          "x": 1000,
+          "y": 160
+        }
+      },
+      {
+        "id": "end",
+        "type": "core.end",
+        "version": 1,
+        "config": {},
+        "ui": {
+          "x": 1240,
+          "y": 160
+        }
+      },
+      {
+        "id": "no-command",
+        "type": "core.end",
+        "version": 1,
+        "config": {},
+        "ui": {
+          "x": 1480,
+          "y": 160
+        }
+      }
+    ],
+    "edges": [
+      {
+        "from": "start",
+        "from_port": "success",
+        "to": "wait",
+        "to_port": "in"
+      },
+      {
+        "from": "wait",
+        "from_port": "success",
+        "to": "confirm",
+        "to_port": "in"
+      },
+      {
+        "from": "confirm",
+        "from_port": "success",
+        "to": "done",
+        "to_port": "in"
+      },
+      {
+        "from": "done",
+        "from_port": "success",
+        "to": "end",
+        "to_port": "in"
+      },
+      {
+        "from": "wait",
+        "from_port": "timeout",
+        "to": "no-command",
+        "to_port": "in"
+      },
+      {
+        "from": "confirm",
+        "from_port": "timeout",
+        "to": "failed",
+        "to_port": "in"
+      },
+      {
+        "from": "confirm",
+        "from_port": "rejected",
+        "to": "failed",
+        "to_port": "in"
+      },
+      {
+        "from": "failed",
+        "from_port": "success",
+        "to": "end",
+        "to_port": "in"
+      }
+    ]
+  }
+}

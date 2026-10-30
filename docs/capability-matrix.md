@@ -1,13 +1,29 @@
 # 公开能力示例矩阵
 
-本页以公开客户端 `GET /api/rpa/node-catalog` 的 Node Schema 为准，帮助开发者从“我要做什么”找到对应示例。节点配置必须以客户端返回的 Catalog revision 和 Schema 为准；示例不复制私有实现。
+本页帮助开发者从“我要做什么”找到对应示例。节点配置和版本以目标客户端 `GET /api/rpa/node-catalog` 返回的 Catalog revision 和 Node Schema 为准。
+
+示例源代码在 `scenarios/`，通过公共 SDK 的 Go Builder 生成 `workflows/*.json`；不是在插件内执行 Graph。插件 Host 当前开放的 capability 与内置工作流节点不是同一个能力列表。
+
+## 会话、事件和文件
+
+| 能力 | Go 生成的示例 |
+| --- | --- |
+| 人工操作、元素/文本/URL/Cookie 检测、保持浏览器 | `login-and-keep.json` |
+| 复用空闲会话并执行其他任务 | `reuse-session.json` |
+| 新文档脚本、消息进入连接器 | `session-script-listener.json` |
+| 外部指令的领取、核验、完成/失败回执 | `external-command.json` |
+| 外部处理请求与可靠 Webhook 通知 | `reply-request.json` |
+| 素材上传、响应选择和业务完成核验 | `upload-and-confirm.json` |
+| 先监听后动作、响应加密变量 | `wait-response.json` |
+| 下载完成入库 | `managed-download.json` |
+| 根图统一定义的共享子流程 | `shared-subflow.json` |
 
 ## 浏览器节点
 
 | 节点 | 示例 |
 | --- | --- |
 | `browser.open`、`browser.close`、`browser.navigate`、`browser.reload` | `workflows/browser-basics.json` |
-| `browser.wait`、`browser.click`、`browser.double_click`、`browser.right_click`、`browser.hover` | `workflows/browser-basics.json` |
+| `browser.wait`、`browser.click`（single/double/right）、`browser.hover` | `workflows/browser-basics.json` |
 | `browser.type`、`browser.clear`、`browser.press`、`browser.select`、`browser.check` | `workflows/browser-basics.json` |
 | `browser.read_text`、`browser.read_attribute`、`browser.read_title`、`browser.read_url`、`browser.inspect` | `workflows/browser-basics.json` |
 | `browser.scroll`、`browser.screenshot` | `workflows/browser-basics.json`、`workflows/artifacts.json` |

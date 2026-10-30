@@ -1,7 +1,7 @@
 {
   "id": "examples.capability",
   "name": "Capability 调用示例",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "kind": "automation",
   "entrypoint": "bin/plugin",
   "permissions": [
@@ -15,36 +15,65 @@
       "metadata": {
         "type": "examples.capability.page_title",
         "version": 1,
-        "display_name": "读取页面标题（插件）",
-        "description": "通过 browser capability 读取当前页面标题",
+        "display_name": "page_title（插件）",
+        "description": "通过宿主授权能力调用，不直连浏览器",
         "category": "插件示例",
-        "security_level": "safe",
-        "idempotency": "idempotent",
-        "docs_url": "https://browser-rpa.github.io/anon-browser-docs/plugins/capabilities"
+        "security_level": "sensitive",
+        "idempotency": "idempotent"
       },
       "schema": {
         "version": 1,
         "input_schema": {
-          "$schema": "https://json-schema.org/draft/2020-12/schema",
           "type": "object",
-          "additionalProperties": false,
           "properties": {
-            "output_variable": { "type": "string", "title": "保存到变量" }
-          }
+            "output_variable": {
+              "type": "string",
+              "title": "保存到变量"
+            }
+          },
+          "additionalProperties": false
         },
-        "output_schema": { "type": "object", "properties": { "value": { "type": "string" } } },
+        "output_schema": {
+          "type": "object",
+          "properties": {
+            "value": {}
+          },
+          "additionalProperties": false
+        },
         "ports": [
-          { "name": "in", "kind": "input" },
-          { "name": "success", "kind": "output" },
-          { "name": "error", "kind": "error" }
-        ],
-        "errors": []
+          {
+            "name": "in",
+            "kind": "input"
+          },
+          {
+            "name": "success",
+            "kind": "output"
+          },
+          {
+            "name": "error",
+            "kind": "error"
+          }
+        ]
       },
       "policy": {
-        "capabilities": ["browser.read"],
-        "required_permissions": ["browser.read"],
-        "timeouts": { "default": 10000000000, "minimum": 100000000, "maximum": 60000000000 },
-        "resources": { "active_page": true },
+        "capabilities": [
+          "browser.read",
+          "variables.write"
+        ],
+        "required_permissions": [
+          "browser.read",
+          "variables.write"
+        ],
+        "timeouts": {
+          "default": 10000000000,
+          "minimum": 100000000,
+          "maximum": 60000000000
+        },
+        "resources": {
+          "profile_lease": true,
+          "runtime": true,
+          "active_page": true
+        },
         "max_attempts": 1
       }
     },
@@ -52,36 +81,65 @@
       "metadata": {
         "type": "examples.capability.page_url",
         "version": 1,
-        "display_name": "读取页面地址（插件）",
-        "description": "通过 browser capability 读取当前页面 URL",
+        "display_name": "page_url（插件）",
+        "description": "通过宿主授权能力调用，不直连浏览器",
         "category": "插件示例",
-        "security_level": "safe",
-        "idempotency": "idempotent",
-        "docs_url": "https://browser-rpa.github.io/anon-browser-docs/plugins/capabilities"
+        "security_level": "sensitive",
+        "idempotency": "idempotent"
       },
       "schema": {
         "version": 1,
         "input_schema": {
-          "$schema": "https://json-schema.org/draft/2020-12/schema",
           "type": "object",
-          "additionalProperties": false,
           "properties": {
-            "output_variable": { "type": "string", "title": "保存到变量" }
-          }
+            "output_variable": {
+              "type": "string",
+              "title": "保存到变量"
+            }
+          },
+          "additionalProperties": false
         },
-        "output_schema": { "type": "object", "properties": { "value": { "type": "string" } } },
+        "output_schema": {
+          "type": "object",
+          "properties": {
+            "value": {}
+          },
+          "additionalProperties": false
+        },
         "ports": [
-          { "name": "in", "kind": "input" },
-          { "name": "success", "kind": "output" },
-          { "name": "error", "kind": "error" }
-        ],
-        "errors": []
+          {
+            "name": "in",
+            "kind": "input"
+          },
+          {
+            "name": "success",
+            "kind": "output"
+          },
+          {
+            "name": "error",
+            "kind": "error"
+          }
+        ]
       },
       "policy": {
-        "capabilities": ["browser.read"],
-        "required_permissions": ["browser.read"],
-        "timeouts": { "default": 10000000000, "minimum": 100000000, "maximum": 60000000000 },
-        "resources": { "active_page": true },
+        "capabilities": [
+          "browser.read",
+          "variables.write"
+        ],
+        "required_permissions": [
+          "browser.read",
+          "variables.write"
+        ],
+        "timeouts": {
+          "default": 10000000000,
+          "minimum": 100000000,
+          "maximum": 60000000000
+        },
+        "resources": {
+          "profile_lease": true,
+          "runtime": true,
+          "active_page": true
+        },
         "max_attempts": 1
       }
     },
@@ -89,37 +147,67 @@
       "metadata": {
         "type": "examples.capability.variable_get",
         "version": 1,
-        "display_name": "读取工作流变量（插件）",
-        "description": "通过 variables capability 读取当前 Run 的变量",
+        "display_name": "variable_get（插件）",
+        "description": "通过宿主授权能力调用，不直连浏览器",
         "category": "插件示例",
-        "security_level": "safe",
-        "idempotency": "idempotent",
-        "docs_url": "https://browser-rpa.github.io/anon-browser-docs/plugins/capabilities"
+        "security_level": "sensitive",
+        "idempotency": "idempotent"
       },
       "schema": {
         "version": 1,
         "input_schema": {
-          "$schema": "https://json-schema.org/draft/2020-12/schema",
           "type": "object",
-          "additionalProperties": false,
           "properties": {
-            "name": { "type": "string", "title": "变量名", "x-allow-variable-ref": false },
-            "output_variable": { "type": "string", "title": "保存到变量" }
+            "name": {
+              "type": "string",
+              "title": "变量名"
+            },
+            "output_variable": {
+              "type": "string",
+              "title": "保存到变量"
+            }
           },
-          "required": ["name"]
+          "required": [
+            "name"
+          ],
+          "additionalProperties": false
         },
-        "output_schema": { "type": "object" },
+        "output_schema": {
+          "type": "object",
+          "properties": {
+            "value": {}
+          },
+          "additionalProperties": false
+        },
         "ports": [
-          { "name": "in", "kind": "input" },
-          { "name": "success", "kind": "output" },
-          { "name": "error", "kind": "error" }
-        ],
-        "errors": []
+          {
+            "name": "in",
+            "kind": "input"
+          },
+          {
+            "name": "success",
+            "kind": "output"
+          },
+          {
+            "name": "error",
+            "kind": "error"
+          }
+        ]
       },
       "policy": {
-        "capabilities": ["variables.read"],
-        "required_permissions": ["variables.read"],
-        "timeouts": { "default": 5000000000, "minimum": 100000000, "maximum": 60000000000 },
+        "capabilities": [
+          "variables.read",
+          "variables.write"
+        ],
+        "required_permissions": [
+          "variables.read",
+          "variables.write"
+        ],
+        "timeouts": {
+          "default": 10000000000,
+          "minimum": 100000000,
+          "maximum": 60000000000
+        },
         "resources": {},
         "max_attempts": 1
       }
@@ -128,38 +216,69 @@
       "metadata": {
         "type": "examples.capability.variable_set",
         "version": 1,
-        "display_name": "写入工作流变量（插件）",
-        "description": "通过 variables capability 写入当前 Run 的变量",
+        "display_name": "variable_set（插件）",
+        "description": "通过宿主授权能力调用，不直连浏览器",
         "category": "插件示例",
-        "security_level": "safe",
-        "idempotency": "idempotent",
-        "docs_url": "https://browser-rpa.github.io/anon-browser-docs/plugins/capabilities"
+        "security_level": "sensitive",
+        "idempotency": "idempotent"
       },
       "schema": {
         "version": 1,
         "input_schema": {
-          "$schema": "https://json-schema.org/draft/2020-12/schema",
           "type": "object",
-          "additionalProperties": false,
           "properties": {
-            "name": { "type": "string", "title": "变量名" },
-            "value": { "title": "变量值", "x-allow-variable-ref": true },
-            "output_variable": { "type": "string", "title": "保存到变量" }
+            "name": {
+              "type": "string",
+              "title": "变量名"
+            },
+            "output_variable": {
+              "type": "string",
+              "title": "保存到变量"
+            },
+            "value": {
+              "title": "变量值"
+            }
           },
-          "required": ["name", "value"]
+          "required": [
+            "name",
+            "value"
+          ],
+          "additionalProperties": false
         },
-        "output_schema": { "type": "object" },
+        "output_schema": {
+          "type": "object",
+          "properties": {
+            "value": {}
+          },
+          "additionalProperties": false
+        },
         "ports": [
-          { "name": "in", "kind": "input" },
-          { "name": "success", "kind": "output" },
-          { "name": "error", "kind": "error" }
-        ],
-        "errors": []
+          {
+            "name": "in",
+            "kind": "input"
+          },
+          {
+            "name": "success",
+            "kind": "output"
+          },
+          {
+            "name": "error",
+            "kind": "error"
+          }
+        ]
       },
       "policy": {
-        "capabilities": ["variables.write"],
-        "required_permissions": ["variables.write"],
-        "timeouts": { "default": 5000000000, "minimum": 100000000, "maximum": 60000000000 },
+        "capabilities": [
+          "variables.write"
+        ],
+        "required_permissions": [
+          "variables.write"
+        ],
+        "timeouts": {
+          "default": 10000000000,
+          "minimum": 100000000,
+          "maximum": 60000000000
+        },
         "resources": {},
         "max_attempts": 1
       }
@@ -168,40 +287,83 @@
       "metadata": {
         "type": "examples.capability.http_request",
         "version": 1,
-        "display_name": "发起 HTTP 请求（插件）",
-        "description": "通过 http capability 请求外部服务",
+        "display_name": "http_request（插件）",
+        "description": "通过宿主授权能力调用，不直连浏览器",
         "category": "插件示例",
-        "security_level": "sensitive",
-        "idempotency": "idempotent",
-        "docs_url": "https://browser-rpa.github.io/anon-browser-docs/plugins/capabilities"
+        "security_level": "high_risk",
+        "idempotency": "non_idempotent"
       },
       "schema": {
         "version": 1,
         "input_schema": {
-          "$schema": "https://json-schema.org/draft/2020-12/schema",
           "type": "object",
-          "additionalProperties": false,
           "properties": {
-            "method": { "type": "string", "title": "请求方法", "enum": ["GET", "POST", "PUT", "PATCH", "DELETE"] },
-            "url": { "type": "string", "title": "请求地址" },
-            "headers": { "type": "object", "title": "请求 Header", "additionalProperties": { "type": "string" } },
-            "body": { "type": "string", "title": "请求 Body" },
-            "output_variable": { "type": "string", "title": "保存到变量" }
+            "body": {},
+            "headers": {
+              "type": "object"
+            },
+            "method": {
+              "type": "string",
+              "title": "请求方法",
+              "enum": [
+                "GET",
+                "POST",
+                "PUT",
+                "PATCH",
+                "DELETE"
+              ]
+            },
+            "output_variable": {
+              "type": "string",
+              "title": "保存到变量"
+            },
+            "url": {
+              "type": "string",
+              "title": "接口地址"
+            }
           },
-          "required": ["method", "url"]
+          "required": [
+            "method",
+            "url"
+          ],
+          "additionalProperties": false
         },
-        "output_schema": { "type": "object" },
+        "output_schema": {
+          "type": "object",
+          "properties": {
+            "value": {}
+          },
+          "additionalProperties": false
+        },
         "ports": [
-          { "name": "in", "kind": "input" },
-          { "name": "success", "kind": "output" },
-          { "name": "error", "kind": "error" }
-        ],
-        "errors": []
+          {
+            "name": "in",
+            "kind": "input"
+          },
+          {
+            "name": "success",
+            "kind": "output"
+          },
+          {
+            "name": "error",
+            "kind": "error"
+          }
+        ]
       },
       "policy": {
-        "capabilities": ["network.fetch"],
-        "required_permissions": ["network.fetch"],
-        "timeouts": { "default": 30000000000, "minimum": 100000000, "maximum": 120000000000 },
+        "capabilities": [
+          "network.fetch",
+          "variables.write"
+        ],
+        "required_permissions": [
+          "network.fetch",
+          "variables.write"
+        ],
+        "timeouts": {
+          "default": 10000000000,
+          "minimum": 100000000,
+          "maximum": 60000000000
+        },
         "resources": {},
         "max_attempts": 1
       }

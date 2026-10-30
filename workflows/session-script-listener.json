@@ -1,0 +1,117 @@
+{
+  "project_id": "local",
+  "name": "为常驻会话注册消息监听",
+  "description": "教学自定义事件入口，不是任何站点的私信协议；先配置连接器及 start_run 触发器，再注册脚本。",
+  "graph": {
+    "schema_version": 3,
+    "start_node_id": "start",
+    "nodes": [
+      {
+        "id": "start",
+        "type": "core.start",
+        "version": 1,
+        "config": {},
+        "ui": {
+          "x": 40,
+          "y": 160
+        }
+      },
+      {
+        "id": "bind",
+        "type": "browser.session_bind",
+        "version": 1,
+        "config": {
+          "session_id": "session-REPLACE_ME"
+        },
+        "ui": {
+          "x": 280,
+          "y": 160
+        }
+      },
+      {
+        "id": "open",
+        "type": "browser.open",
+        "version": 1,
+        "config": {
+          "headless": false
+        },
+        "ui": {
+          "x": 520,
+          "y": 160
+        }
+      },
+      {
+        "id": "listen",
+        "type": "browser.script_register",
+        "version": 1,
+        "config": {
+          "key": "message-listener",
+          "origin": "https://example.test",
+          "source": "window.addEventListener('example:message', e =\u003e {\n const m = e.detail;\n if (!m || typeof m.id !== 'string' || typeof m.text !== 'string' || m.id.length \u003e 128 || m.text.length \u003e 8000) return;\n bridge.emit(m.id, {text: m.text});\n});",
+          "run_at": "document_start",
+          "scope": "session",
+          "connector_id": "connector-REPLACE_ME",
+          "connector_revision": 1
+        },
+        "ui": {
+          "x": 760,
+          "y": 160
+        }
+      },
+      {
+        "id": "page",
+        "type": "browser.navigate",
+        "version": 1,
+        "config": {
+          "url": "https://example.test/messages"
+        },
+        "ui": {
+          "x": 1000,
+          "y": 160
+        }
+      },
+      {
+        "id": "end",
+        "type": "core.end",
+        "version": 1,
+        "config": {},
+        "ui": {
+          "x": 1240,
+          "y": 160
+        }
+      }
+    ],
+    "edges": [
+      {
+        "from": "start",
+        "from_port": "success",
+        "to": "bind",
+        "to_port": "in"
+      },
+      {
+        "from": "bind",
+        "from_port": "success",
+        "to": "open",
+        "to_port": "in"
+      },
+      {
+        "from": "open",
+        "from_port": "success",
+        "to": "listen",
+        "to_port": "in"
+      },
+      {
+        "from": "listen",
+        "from_port": "success",
+        "to": "page",
+        "to_port": "in"
+      },
+      {
+        "from": "page",
+        "from_port": "success",
+        "to": "end",
+        "to_port": "in"
+      }
+    ]
+  }
+}

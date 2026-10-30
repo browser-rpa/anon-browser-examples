@@ -1,106 +1,109 @@
 # anon-browser examples
 
-这里是 anon-browser 公开开发者示例仓库，只包含可以在公开客户端 API、RPA 节点 Schema 和自动化插件契约上运行的示例。示例面向已经下载并启动 anon-browser 桌面客户端的本地开发者，不包含服务端部署或私有实现。
+anon-browser 插件与工作流开发示例，基于 [anon-browser-sdk](https://github.com/browser-rpa/anon-browser-sdk)，演示节点定义、能力调用、工作流编排和客户端 API 集成。
 
-## 目录
+## 本地准备
 
-- `plugins/echo-node`：最小自动化插件，导出一个把输入写入输出的 RPA 节点。
-- `plugins/capability-node`：Go 编写的 capability 调用示例，演示读取页面、读写工作流变量和发起 HTTP 请求。
-- `workflows/`：按能力拆分的工作流 Graph，包括浏览器操作、标签页、变量和流程控制、会话数据、网络规则、后台观察、文件产物和临时环境。
-- `docs/capability-matrix.md`：公开节点、API 和示例文件的完整对应表。
-- `scripts/package-plugin.sh`：在本机编译并打包自动化插件。
-- `scripts/`：通过本地客户端 HTTP API 调用健康检查、Profile、Runtime、工作流、Run、计划、插件、扩展和 Artifact 的脚本。
+Go 1.24+。`go.mod` 已固定公开 SDK 的预览提交版本，独立克隆本仓库即可通过 `go mod download` 安装依赖，无需相邻 SDK 目录。SDK 尚未发布稳定版本标签。
 
-## 要求
+示例编译、生成和测试都不需要运行桌面应用；真正执行需要已启动的 anon-browser 客户端。API 默认为 `http://127.0.0.1:8787`，可通过 `ANON_BROWSER_API` 覆盖。
 
-- Go 1.22+，用于构建示例插件；
-- 已下载并启动 anon-browser 桌面客户端；
-- 本地 API 地址默认为 `http://127.0.0.1:8787`，可通过 `ANON_BROWSER_API` 覆盖。
+## 源码与生成物
 
-## 打包并导入插件
+- `plugins/echo-node/main.go`：共享 SDK 协议、Go 节点描述和最小 handler。
+- `plugins/capability-node/main.go`：类型化读取页面、变量操作、HTTP 调用；不再手写协议结构体、ID 或 stdin/stdout 往返。
+- `scenarios/scenarios.go`：新增能力的 Go 编排示例。
+- `scenarios/legacy.go`：原基础示例的 Go 源码，也已按当前 Catalog 修正。
+- `workflows/*.json`、`plugins/*/manifest.json`：生成后的公开交换文件，不直接编辑。
+- `scripts/`：导入、查询和运行的 HTTP 示例。
+
+```bash
+go test ./...
+go run ./cmd/generate-workflows
+go run ./cmd/generate-workflows --check
+bash scripts/check-generated.sh
+```
+
+Manifest 的来源也是 Go。更新插件定义后生成：
+
+```bash
+go run ./plugins/echo-node --manifest > plugins/echo-node/manifest.json
+go run ./plugins/capability-node --manifest > plugins/capability-node/manifest.json
+```
+
+## 插件如何开发
+
+```go
+server := plugin.NewServer()
+err := server.Register("acme.page_title", 1, func(ctx context.Context, call plugin.NodeCall) (plugin.NodeResult, error) {
+    title, err := call.Client.ReadTitle(ctx)
+    if err != nil { return plugin.NodeResult{}, err }
+    return plugin.NodeResult{NextPort: "success", Output: map[string]any{"value": title}}, nil
+})
+if err != nil { return err }
+return server.Serve(context.Background(), os.Stdin, os.Stdout)
+```
+
+完整的 imports、main、Manifest 和权限声明见两个插件目录。通过 `plugin.Describe`、`plugin.Object`、`plugin.String` 用 Go 描述节点；使用 `time.Second`，不需要手算 JSON 中的纳秒值。
 
 ```bash
 ./scripts/package-plugin.sh echo-node
-# capability 示例
 ./scripts/package-plugin.sh capability-node
+# 支持交叉编译；Manifest 生成仍在构建主机执行：
+GOOS=windows GOARCH=amd64 ./scripts/package-plugin.sh echo-node
 ```
 
-脚本会生成 `dist/echo-node-<os>-<arch>.abp`。随后可以在桌面端“扩展中心 → 自动化插件”导入，或执行：
+产物为 `dist/<name>-<os>-<arch>.abp`。从“扩展中心 → 自动化插件”导入，安装/升级后重启客户端使节点重新注册。打包脚本直接从 Go 生成 Manifest，不依赖可能过期的 JSON 快照。
+
+插件能力须由 Manifest 和节点 Policy 声明，运行时还受宿主授权。声明受限权限的节点应为 `sensitive` 或 `high_risk`，不能标为 `safe`。独立进程不是不可信代码沙箱，只运行可信插件。
+
+`capability-node` 的每个节点都支持 `output_variable`，所以除主操作权限外，还声明 `variables.write`。只返回 `Output` 的节点不需要这个权限。HTTP 节点使用 `high_risk`；运行时不能借用同包其他节点的权限。Manifest 生成过程会校验声明并指出出错节点与字段。
+
+## 工作流用 Go 编排
+
+```go
+flow, err := workflow.New("local", "会话任务").Add(
+    workflow.Start("start"),
+    workflow.BindSession("bind", "session-REPLACE_ME"),
+    workflow.Open("open", false),
+    workflow.Navigate("page", "https://example.test/workspace"),
+    workflow.End("end"),
+).Then("start", "bind", "open", "page", "end").Build()
+```
+
+`Then` 连接 success；其他分支必须显式 `Link`。变量用 `workflow.Ref("name")`；复杂节点用类型化 Config；尚未封装的节点可用 `N(id, type, config)`，无需手写 JSON 字符串。生成后仍要通过目标客户端的 Catalog 校验和发布。
 
 ```bash
-curl -X POST "$ANON_BROWSER_API/api/plugins/automation/import" \
-  -F 'file=@dist/echo-node-darwin-arm64.abp'
+./scripts/curl-workflow.sh workflows/login-and-keep.json
 ```
 
-导入后重新打开 RPA 编辑器，节点 `examples.echo` 或 `examples.capability.*` 会出现在左侧节点库。
+### 新增能力示例
 
-## Go 插件如何调用 Core 能力
-
-自动化插件是一个由 Core 启动的 Go 可执行文件。插件不直接连接 CDP、Profile
-目录或数据库，而是通过 stdin/stdout 传递 JSON。Core 先发送一次节点调用，插件
-需要能力时向 stdout 发送一条 `capability_call`，再从 stdin 读取对应的
-`capability_result`，最后发送 `ok: true` 的节点结果。
-
-例如读取当前页面标题：
-
-```json
-{"type":"capability_call","id":"call-1","capability":"browser","action":"read_title","arguments":{}}
-```
-
-Core 返回：
-
-```json
-{"type":"capability_result","id":"call-1","ok":true,"data":"页面标题"}
-```
-
-插件随后返回：
-
-```json
-{"ok":true,"result":{"next_port":"success","output":{"value":"页面标题"},"variables":{"page.title":"页面标题"}}}
-```
-
-`capability-node` 包含完整的 Go 实现。它演示了以下调用：
-
-| capability | action | 用途 |
-| --- | --- | --- |
-| `browser` | `read_title`、`read_url` | 读取当前页面 |
-| `variables` | `get`、`set` | 读取或写入当前 Run 变量 |
-| `http` | `request` | 通过 Core 发起外部 HTTP 请求 |
-
-插件必须在 Manifest 的 `permissions` 中声明对应权限，节点 Policy 的
-`required_permissions` 也必须声明同一权限；否则调用会被 Core 拒绝。详细的能力边界见
-[公开 capability 文档](https://browser-rpa.github.io/anon-browser-docs/plugins/capabilities)。
-
-## 工作流示例
-
-所有工作流文件都使用公开的 Graph DSL，可以直接在客户端的 RPA 编辑器导入，或通过 API 创建：
-
-```bash
-./scripts/curl-workflow.sh workflows/browser-basics.json
-```
-
-示例中的 `https://example.test`、`profile-...` 和 `environment-...` 是占位值。运行前请替换为自己的测试网址、Profile ID 或环境 ID；涉及 Cookie、Storage、JavaScript、请求改写和外部 HTTP 的工作流需要在客户端中显式批准相应权限。
-
-### 能力覆盖
-
-| 能力 | 示例 |
+| 文件 | 演示与前置条件 |
 | --- | --- |
-| 浏览器启动、导航、等待、点击、输入、按键、滚动、读取文本/属性/标题/URL、截图 | `workflows/browser-basics.json` |
-| 新建、切换、关闭标签页，以及前进、后退、刷新 | `workflows/tabs.json` |
-| 变量、条件、分支、延迟 | `workflows/control-flow.json` |
-| 循环、遍历、异常处理和重试 | `workflows/loops.json`、`workflows/error-handling.json` |
-| Cookie、localStorage/sessionStorage 写入和读取 | `workflows/session-storage.json` |
-| JavaScript、请求放行/拦截/Header 修改/Body 替换 | `workflows/page-script-and-network.json` |
-| 后台元素观察、URL 观察和等待/停止后台任务 | `workflows/background-watch.json`、`workflows/background-url-watch.json`、`workflows/background-stop.json` |
-| 文本、JSON、CSV、HTML 文件产物和截图产物 | `workflows/artifacts.json` |
-| 临时环境创建、已有环境选择、保存和丢弃 | `workflows/environments.json`、`workflows/select-environment.json`、`workflows/discard-environment.json` |
-| HTTP API 创建、发布、运行、调试、事件和 Artifact 下载 | `scripts/workflow-lifecycle.sh`、`scripts/download-artifact.sh` |
-| Runtime 查询、启动和停止 | `scripts/runtime-lifecycle.sh` |
-| Cron 计划创建 | `scripts/schedule-workflow.sh` |
-| Profile、浏览器扩展和自动化插件管理 | `scripts/profile-lifecycle.sh`、`scripts/import-extension.sh`、`scripts/import-plugin.sh` |
+| `login-and-keep.json` | 选已有环境 → 打开 → 手动登录、自动检测完成 → 保持会话；首次先创建环境，或用环境创建节点替换选择节点 |
+| `reuse-session.json` | 绑定已保存会话 → 读取固定页面 → Webhook 回传业务内容；替换 session ID、选择器和回调 |
+| `session-script-listener.json` | 绑定会话 → 注册 document_start 脚本 → 导航；先配置事件连接器及启用的 start_run 触发器 |
+| `external-command.json` | 等待 signal_run 指令 → 业务结果核验 → 完成/失败回执 |
+| `reply-request.json` | 创建消息处理请求 → Webhook 通知 → 等待回复 → 核验 → 完成回执；先建 reply_request 入口 |
+| `upload-and-confirm.json` | 从素材库交付文件，监听上传响应并检测页面完成状态；last 选择规则有显式静默边界 |
+| `wait-response.json` | 先监听再点击，保存第一条匹配响应 |
+| `managed-download.json` | 先监听再点击下载，完成后保存到素材库并得到引用 |
+| `shared-subflow.json` | 在根图定义一次子流程，两次调用，分别映射结果 |
 
-这些文件展示配置方式和节点连接方式；页面选择器、Cookie 值、外部 URL 和权限应按你的测试目标替换，不要把真实 Secret 提交到仓库。
+所有网址、选择器、连接器、会话 ID、Secret 和素材引用均为占位值，结构校验通过不代表对某个真实站点已适配。监听示例只接收教学自定义事件，不宣称已实现小红书私信监听。外部指令示例用人工核验标出真实业务操作的位置，不会伪装已发送消息。
 
-## 公开边界
+### 外部调用与文件边界
 
-示例不会依赖私有仓库、内部数据库、Profile 数据目录、原始 CDP 地址、Gateway 配置或服务端部署逻辑。需要浏览器能力时，应通过插件 Host 的 capability 协议请求，不要自行连接浏览器调试端口。
+- `start_run` 创建新运行；可在固定流程内绑定一个空闲的已有会话。`signal_run` 投递给绑定的活动运行，由 `signal.wait` 在安全点领取，不会任意跳转画布。
+- `reply_request` 只回复已上报且未过期的处理请求；`signal.complete` 应在业务证据核验后执行。受理、领取消费、HTTP 200 均不等于发布/发送成功。
+- 页面脚本事件进入 Connector Inbox，经固定版本触发器启动独立 Run，不是自动恢复原 Run 的等待节点。外部通知再由该工作流的 Webhook 节点发出。
+- Webhook 回调使用固定 HTTPS 地址和签名 Secret 引用。事件、响应、Cookie 等敏感数据不要直接放入回调或日志。
+- 上传只接受项目内素材引用，不接收本机路径或 CDN URL。先上传素材库或通过受控网页下载入库，再传 `artifact_ref`。
+- 响应监听支持 first/last/nth/all/first_match；last/all 必须配置数量、时间窗或静默边界。响应正文/Header/Cookie 保存在受控加密引用中，字段提取继续遵守宿主敏感数据规则。
+
+原浏览器、标签页、变量、循环、后台观察、环境和产物示例仍保留，详见 [能力矩阵](docs/capability-matrix.md)。双击/右键使用 `browser.click` 的 `mode`，不要再使用旧独立节点类型。
+
+## 验证边界
+
+`go test ./...` 检查示例包能否编译；`scripts/check-generated.sh` 检查 Go 定义与生成的 Manifest、工作流 JSON 是否一致。实际运行前，请在目标版本的客户端中校验工作流并确认所需权限。示例中的网址、选择器和引用需按使用场景替换，不包含站点凭据或实际业务数据。

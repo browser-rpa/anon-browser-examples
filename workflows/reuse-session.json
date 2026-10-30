@@ -1,0 +1,138 @@
+{
+  "project_id": "local",
+  "name": "复用已登录会话读取内容",
+  "description": "绑定会话需要在打开浏览器之前；忙碌时不会抢占。固定页面，不让外部参数控制 URL 或会话。",
+  "graph": {
+    "schema_version": 3,
+    "start_node_id": "start",
+    "nodes": [
+      {
+        "id": "start",
+        "type": "core.start",
+        "version": 1,
+        "config": {},
+        "ui": {
+          "x": 40,
+          "y": 160
+        }
+      },
+      {
+        "id": "bind",
+        "type": "browser.session_bind",
+        "version": 1,
+        "config": {
+          "session_id": "session-REPLACE_ME"
+        },
+        "ui": {
+          "x": 280,
+          "y": 160
+        }
+      },
+      {
+        "id": "open",
+        "type": "browser.open",
+        "version": 1,
+        "config": {
+          "headless": false
+        },
+        "ui": {
+          "x": 520,
+          "y": 160
+        }
+      },
+      {
+        "id": "page",
+        "type": "browser.navigate",
+        "version": 1,
+        "config": {
+          "url": "https://example.test/workspace"
+        },
+        "ui": {
+          "x": 760,
+          "y": 160
+        }
+      },
+      {
+        "id": "read",
+        "type": "browser.read_text",
+        "version": 1,
+        "config": {
+          "selector": "[data-test=content]",
+          "output_variable": "page.content"
+        },
+        "ui": {
+          "x": 1000,
+          "y": 160
+        }
+      },
+      {
+        "id": "notify",
+        "type": "webhook.emit",
+        "version": 1,
+        "config": {
+          "url": "https://callback.example.invalid/content",
+          "signing_secret": {
+            "secret_ref": "secret://callbacks/signing"
+          },
+          "body": {
+            "content": {
+              "variable_ref": "page.content"
+            }
+          }
+        },
+        "ui": {
+          "x": 1240,
+          "y": 160
+        }
+      },
+      {
+        "id": "end",
+        "type": "core.end",
+        "version": 1,
+        "config": {},
+        "ui": {
+          "x": 1480,
+          "y": 160
+        }
+      }
+    ],
+    "edges": [
+      {
+        "from": "start",
+        "from_port": "success",
+        "to": "bind",
+        "to_port": "in"
+      },
+      {
+        "from": "bind",
+        "from_port": "success",
+        "to": "open",
+        "to_port": "in"
+      },
+      {
+        "from": "open",
+        "from_port": "success",
+        "to": "page",
+        "to_port": "in"
+      },
+      {
+        "from": "page",
+        "from_port": "success",
+        "to": "read",
+        "to_port": "in"
+      },
+      {
+        "from": "read",
+        "from_port": "success",
+        "to": "notify",
+        "to_port": "in"
+      },
+      {
+        "from": "notify",
+        "from_port": "success",
+        "to": "end",
+        "to_port": "in"
+      }
+    ]
+  }
+}

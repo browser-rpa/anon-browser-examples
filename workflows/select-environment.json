@@ -3,18 +3,75 @@
   "name": "选择已有环境示例",
   "description": "把 environment_id 替换为客户端中已保存的环境，再执行后续浏览器操作。",
   "graph": {
-    "schema_version": 1,
+    "schema_version": 3,
     "start_node_id": "select",
     "nodes": [
-      { "id": "select", "type": "environment.select", "version": 1, "config": { "environment_id": "environment-replace-me" }, "ui": { "x": 40, "y": 160 } },
-      { "id": "open", "type": "browser.open", "version": 1, "config": { "headless": false }, "ui": { "x": 320, "y": 160 } },
-      { "id": "navigate", "type": "browser.navigate", "version": 1, "config": { "url": "https://example.com/" }, "ui": { "x": 600, "y": 160 } },
-      { "id": "end", "type": "core.end", "version": 1, "config": {}, "ui": { "x": 880, "y": 160 } }
+      {
+        "id": "select",
+        "type": "environment.select",
+        "version": 1,
+        "config": {
+          "environment_id": "environment-replace-me"
+        },
+        "ui": {
+          "x": 40,
+          "y": 160
+        }
+      },
+      {
+        "id": "open",
+        "type": "browser.open",
+        "version": 1,
+        "config": {
+          "headless": false
+        },
+        "ui": {
+          "x": 280,
+          "y": 160
+        }
+      },
+      {
+        "id": "navigate",
+        "type": "browser.navigate",
+        "version": 1,
+        "config": {
+          "url": "https://example.com/"
+        },
+        "ui": {
+          "x": 520,
+          "y": 160
+        }
+      },
+      {
+        "id": "end",
+        "type": "core.end",
+        "version": 1,
+        "config": {},
+        "ui": {
+          "x": 760,
+          "y": 160
+        }
+      }
     ],
     "edges": [
-      { "from": "select", "from_port": "success", "to": "open", "to_port": "in" },
-      { "from": "open", "from_port": "success", "to": "navigate", "to_port": "in" },
-      { "from": "navigate", "from_port": "success", "to": "end", "to_port": "in" }
+      {
+        "from": "select",
+        "from_port": "success",
+        "to": "open",
+        "to_port": "in"
+      },
+      {
+        "from": "open",
+        "from_port": "success",
+        "to": "navigate",
+        "to_port": "in"
+      },
+      {
+        "from": "navigate",
+        "from_port": "success",
+        "to": "end",
+        "to_port": "in"
+      }
     ]
   }
 }

@@ -3,52 +3,397 @@
   "name": "浏览器基础操作示例",
   "description": "覆盖常见浏览器节点。请把 demo.example 替换成自己的测试页面并调整选择器。",
   "graph": {
-    "schema_version": 1,
+    "schema_version": 3,
     "start_node_id": "open",
     "nodes": [
-      { "id": "open", "type": "browser.open", "version": 1, "config": { "headless": false }, "ui": { "x": 40, "y": 180 } },
-      { "id": "navigate", "type": "browser.navigate", "version": 1, "config": { "url": "https://demo.example/form" }, "ui": { "x": 280, "y": 180 } },
-      { "id": "wait", "type": "browser.wait", "version": 1, "config": { "selector": "#demo-form" }, "ui": { "x": 520, "y": 180 } },
-      { "id": "inspect", "type": "browser.inspect", "version": 1, "config": { "max_elements": 40, "output_variable": "page.elements" }, "ui": { "x": 760, "y": 180 } },
-      { "id": "read-title", "type": "browser.read_title", "version": 1, "config": { "output_variable": "page.title" }, "ui": { "x": 1000, "y": 180 } },
-      { "id": "read-url", "type": "browser.read_url", "version": 1, "config": { "output_variable": "page.url" }, "ui": { "x": 1240, "y": 180 } },
-      { "id": "read-text", "type": "browser.read_text", "version": 1, "config": { "selector": "#result", "output_variable": "page.result" }, "ui": { "x": 1480, "y": 180 } },
-      { "id": "read-attribute", "type": "browser.read_attribute", "version": 1, "config": { "selector": "#demo-link", "attribute": "href", "output_variable": "link.href" }, "ui": { "x": 1720, "y": 180 } },
-      { "id": "clear", "type": "browser.clear", "version": 1, "config": { "selector": "#name" }, "ui": { "x": 1960, "y": 180 } },
-      { "id": "type", "type": "browser.type", "version": 1, "config": { "selector": "#name", "text": "anon-browser" }, "ui": { "x": 2200, "y": 180 } },
-      { "id": "select", "type": "browser.select", "version": 1, "config": { "selector": "#country", "value": "CN" }, "ui": { "x": 2440, "y": 180 } },
-      { "id": "check", "type": "browser.check", "version": 1, "config": { "selector": "#accept", "checked": true }, "ui": { "x": 2680, "y": 180 } },
-      { "id": "hover", "type": "browser.hover", "version": 1, "config": { "selector": "#help" }, "ui": { "x": 2920, "y": 180 } },
-      { "id": "click", "type": "browser.click", "version": 1, "config": { "selector": "#submit" }, "ui": { "x": 3160, "y": 180 } },
-      { "id": "press", "type": "browser.press", "version": 1, "config": { "selector": "#name", "key": "Enter" }, "ui": { "x": 3400, "y": 180 } },
-      { "id": "scroll", "type": "browser.scroll", "version": 1, "config": { "direction": "down", "randomize_amount": true, "amount_min": 400, "amount_max": 800, "humanize": true, "segments_min": 2, "segments_max": 4, "pause_min_ms": 120, "pause_max_ms": 350 }, "ui": { "x": 3640, "y": 180 } },
-      { "id": "double-click", "type": "browser.double_click", "version": 1, "config": { "selector": "#result" }, "ui": { "x": 3880, "y": 180 } },
-      { "id": "right-click", "type": "browser.right_click", "version": 1, "config": { "selector": "#result" }, "ui": { "x": 4120, "y": 180 } },
-      { "id": "screenshot", "type": "browser.screenshot", "version": 1, "config": { "name": "browser-basics" }, "ui": { "x": 4360, "y": 180 } },
-      { "id": "close", "type": "browser.close", "version": 1, "config": {}, "ui": { "x": 4600, "y": 180 } },
-      { "id": "end", "type": "core.end", "version": 1, "config": {}, "ui": { "x": 4840, "y": 180 } }
+      {
+        "id": "open",
+        "type": "browser.open",
+        "version": 1,
+        "config": {
+          "headless": false
+        },
+        "ui": {
+          "x": 40,
+          "y": 160
+        }
+      },
+      {
+        "id": "navigate",
+        "type": "browser.navigate",
+        "version": 1,
+        "config": {
+          "url": "https://demo.example/form"
+        },
+        "ui": {
+          "x": 280,
+          "y": 160
+        }
+      },
+      {
+        "id": "wait",
+        "type": "browser.wait",
+        "version": 1,
+        "config": {
+          "selector": "#demo-form"
+        },
+        "ui": {
+          "x": 520,
+          "y": 160
+        }
+      },
+      {
+        "id": "inspect",
+        "type": "browser.inspect",
+        "version": 1,
+        "config": {
+          "max_elements": 40,
+          "output_variable": "page.elements"
+        },
+        "ui": {
+          "x": 760,
+          "y": 160
+        }
+      },
+      {
+        "id": "read-title",
+        "type": "browser.read_title",
+        "version": 1,
+        "config": {
+          "output_variable": "page.title"
+        },
+        "ui": {
+          "x": 1000,
+          "y": 160
+        }
+      },
+      {
+        "id": "read-url",
+        "type": "browser.read_url",
+        "version": 1,
+        "config": {
+          "output_variable": "page.url"
+        },
+        "ui": {
+          "x": 1240,
+          "y": 160
+        }
+      },
+      {
+        "id": "read-text",
+        "type": "browser.read_text",
+        "version": 1,
+        "config": {
+          "output_variable": "page.result",
+          "selector": "#result"
+        },
+        "ui": {
+          "x": 1480,
+          "y": 160
+        }
+      },
+      {
+        "id": "read-attribute",
+        "type": "browser.read_attribute",
+        "version": 1,
+        "config": {
+          "attribute": "href",
+          "output_variable": "link.href",
+          "selector": "#demo-link"
+        },
+        "ui": {
+          "x": 1720,
+          "y": 160
+        }
+      },
+      {
+        "id": "clear",
+        "type": "browser.clear",
+        "version": 1,
+        "config": {
+          "selector": "#name"
+        },
+        "ui": {
+          "x": 1960,
+          "y": 160
+        }
+      },
+      {
+        "id": "type",
+        "type": "browser.type",
+        "version": 1,
+        "config": {
+          "selector": "#name",
+          "text": "anon-browser"
+        },
+        "ui": {
+          "x": 2200,
+          "y": 160
+        }
+      },
+      {
+        "id": "select",
+        "type": "browser.select",
+        "version": 1,
+        "config": {
+          "selector": "#country",
+          "value": "CN"
+        },
+        "ui": {
+          "x": 2440,
+          "y": 160
+        }
+      },
+      {
+        "id": "check",
+        "type": "browser.check",
+        "version": 1,
+        "config": {
+          "checked": true,
+          "selector": "#accept"
+        },
+        "ui": {
+          "x": 2680,
+          "y": 160
+        }
+      },
+      {
+        "id": "hover",
+        "type": "browser.hover",
+        "version": 1,
+        "config": {
+          "selector": "#help"
+        },
+        "ui": {
+          "x": 2920,
+          "y": 160
+        }
+      },
+      {
+        "id": "click",
+        "type": "browser.click",
+        "version": 1,
+        "config": {
+          "selector": "#submit"
+        },
+        "ui": {
+          "x": 3160,
+          "y": 160
+        }
+      },
+      {
+        "id": "press",
+        "type": "browser.press",
+        "version": 1,
+        "config": {
+          "key": "Enter",
+          "selector": "#name"
+        },
+        "ui": {
+          "x": 3400,
+          "y": 160
+        }
+      },
+      {
+        "id": "scroll",
+        "type": "browser.scroll",
+        "version": 1,
+        "config": {
+          "amount_max": 800,
+          "amount_min": 400,
+          "direction": "down",
+          "humanize": true,
+          "pause_max_ms": 350,
+          "pause_min_ms": 120,
+          "randomize_amount": true,
+          "segments_max": 4,
+          "segments_min": 2
+        },
+        "ui": {
+          "x": 3640,
+          "y": 160
+        }
+      },
+      {
+        "id": "double-click",
+        "type": "browser.click",
+        "version": 1,
+        "config": {
+          "mode": "double",
+          "selector": "#result"
+        },
+        "ui": {
+          "x": 3880,
+          "y": 160
+        }
+      },
+      {
+        "id": "right-click",
+        "type": "browser.click",
+        "version": 1,
+        "config": {
+          "mode": "right",
+          "selector": "#result"
+        },
+        "ui": {
+          "x": 4120,
+          "y": 160
+        }
+      },
+      {
+        "id": "screenshot",
+        "type": "browser.screenshot",
+        "version": 1,
+        "config": {
+          "name": "browser-basics"
+        },
+        "ui": {
+          "x": 4360,
+          "y": 160
+        }
+      },
+      {
+        "id": "close",
+        "type": "browser.close",
+        "version": 1,
+        "config": {},
+        "ui": {
+          "x": 4600,
+          "y": 160
+        }
+      },
+      {
+        "id": "end",
+        "type": "core.end",
+        "version": 1,
+        "config": {},
+        "ui": {
+          "x": 4840,
+          "y": 160
+        }
+      }
     ],
     "edges": [
-      { "from": "open", "from_port": "success", "to": "navigate", "to_port": "in" },
-      { "from": "navigate", "from_port": "success", "to": "wait", "to_port": "in" },
-      { "from": "wait", "from_port": "success", "to": "inspect", "to_port": "in" },
-      { "from": "inspect", "from_port": "success", "to": "read-title", "to_port": "in" },
-      { "from": "read-title", "from_port": "success", "to": "read-url", "to_port": "in" },
-      { "from": "read-url", "from_port": "success", "to": "read-text", "to_port": "in" },
-      { "from": "read-text", "from_port": "success", "to": "read-attribute", "to_port": "in" },
-      { "from": "read-attribute", "from_port": "success", "to": "clear", "to_port": "in" },
-      { "from": "clear", "from_port": "success", "to": "type", "to_port": "in" },
-      { "from": "type", "from_port": "success", "to": "select", "to_port": "in" },
-      { "from": "select", "from_port": "success", "to": "check", "to_port": "in" },
-      { "from": "check", "from_port": "success", "to": "hover", "to_port": "in" },
-      { "from": "hover", "from_port": "success", "to": "click", "to_port": "in" },
-      { "from": "click", "from_port": "success", "to": "press", "to_port": "in" },
-      { "from": "press", "from_port": "success", "to": "scroll", "to_port": "in" },
-      { "from": "scroll", "from_port": "success", "to": "double-click", "to_port": "in" },
-      { "from": "double-click", "from_port": "success", "to": "right-click", "to_port": "in" },
-      { "from": "right-click", "from_port": "success", "to": "screenshot", "to_port": "in" },
-      { "from": "screenshot", "from_port": "success", "to": "close", "to_port": "in" },
-      { "from": "close", "from_port": "success", "to": "end", "to_port": "in" }
+      {
+        "from": "open",
+        "from_port": "success",
+        "to": "navigate",
+        "to_port": "in"
+      },
+      {
+        "from": "navigate",
+        "from_port": "success",
+        "to": "wait",
+        "to_port": "in"
+      },
+      {
+        "from": "wait",
+        "from_port": "success",
+        "to": "inspect",
+        "to_port": "in"
+      },
+      {
+        "from": "inspect",
+        "from_port": "success",
+        "to": "read-title",
+        "to_port": "in"
+      },
+      {
+        "from": "read-title",
+        "from_port": "success",
+        "to": "read-url",
+        "to_port": "in"
+      },
+      {
+        "from": "read-url",
+        "from_port": "success",
+        "to": "read-text",
+        "to_port": "in"
+      },
+      {
+        "from": "read-text",
+        "from_port": "success",
+        "to": "read-attribute",
+        "to_port": "in"
+      },
+      {
+        "from": "read-attribute",
+        "from_port": "success",
+        "to": "clear",
+        "to_port": "in"
+      },
+      {
+        "from": "clear",
+        "from_port": "success",
+        "to": "type",
+        "to_port": "in"
+      },
+      {
+        "from": "type",
+        "from_port": "success",
+        "to": "select",
+        "to_port": "in"
+      },
+      {
+        "from": "select",
+        "from_port": "success",
+        "to": "check",
+        "to_port": "in"
+      },
+      {
+        "from": "check",
+        "from_port": "success",
+        "to": "hover",
+        "to_port": "in"
+      },
+      {
+        "from": "hover",
+        "from_port": "success",
+        "to": "click",
+        "to_port": "in"
+      },
+      {
+        "from": "click",
+        "from_port": "success",
+        "to": "press",
+        "to_port": "in"
+      },
+      {
+        "from": "press",
+        "from_port": "success",
+        "to": "scroll",
+        "to_port": "in"
+      },
+      {
+        "from": "scroll",
+        "from_port": "success",
+        "to": "double-click",
+        "to_port": "in"
+      },
+      {
+        "from": "double-click",
+        "from_port": "success",
+        "to": "right-click",
+        "to_port": "in"
+      },
+      {
+        "from": "right-click",
+        "from_port": "success",
+        "to": "screenshot",
+        "to_port": "in"
+      },
+      {
+        "from": "screenshot",
+        "from_port": "success",
+        "to": "close",
+        "to_port": "in"
+      },
+      {
+        "from": "close",
+        "from_port": "success",
+        "to": "end",
+        "to_port": "in"
+      }
     ]
   }
 }
