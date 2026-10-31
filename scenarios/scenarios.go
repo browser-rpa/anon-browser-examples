@@ -12,6 +12,15 @@ const sessionID = "session-REPLACE_ME"
 
 func All() (map[string]wf.Workflow, error) {
 	builders := legacyBuilders()
+	prepare := wf.New("local", "按固定标识准备浏览器").Description("首次创建或复用 demo-main；两条可用分支都检查登录。忙碌、关闭或需检查时停止，不自动换浏览器。示例站点与检测条件需替换。").Add(
+		wf.Start("start"), wf.EnsureSession("prepare", wf.EnsureSessionConfig{SessionKey: "demo-main", CreateIfMissing: true, Name: "演示工作浏览器", OutputVariable: "session.id"}),
+		wf.Navigate("login", origin+"/login"), wf.HumanWait("wait", wf.HumanWaitConfig{Mode: "auto", Title: "请在浏览器中完成登录", TimeoutMS: 600000, StableMS: 1000, Conditions: []wf.WaitCondition{{Kind: "element_visible", Selector: "[data-test=logged-in]"}}}),
+		wf.End("ready"), wf.End("unavailable"),
+	).Then("start", "prepare").Link("prepare", "created", "login").Link("prepare", "reused", "login").Then("login", "wait", "ready").Link("wait", "timeout", "unavailable").Link("wait", "rejected", "unavailable")
+	for _, port := range []string{"missing", "busy", "needs_review", "closed"} {
+		prepare.Link("prepare", port, "unavailable")
+	}
+	builders["ensure-session.json"] = prepare
 	builders["login-and-keep.json"] = wf.New("local", "人工登录并保持浏览器").Description("先替换环境 ID；检测到登录状态后保存会话，任务结束不关闭浏览器。").Add(
 		wf.Start("start"), wf.N("environment", "environment.select", map[string]any{"environment_id": "environment-REPLACE_ME"}), wf.Open("open", false), wf.Navigate("login", origin+"/login"),
 		wf.HumanWait("wait", wf.HumanWaitConfig{Mode: "auto", Title: "请在浏览器中完成登录", TimeoutMS: 600000, StableMS: 1000, Conditions: []wf.WaitCondition{{Kind: "element_visible", Selector: "[data-test=logged-in]"}}}),

@@ -4,7 +4,16 @@ anon-browser 插件与工作流开发示例，基于 [anon-browser-sdk](https://
 
 ## 本地准备
 
-Go 1.24+。`go.mod` 已固定公开 SDK 的预览提交版本，独立克隆本仓库即可通过 `go mod download` 安装依赖，无需相邻 SDK 目录。SDK 尚未发布稳定版本标签。
+Go 1.24+。`go.mod` 固定了公开 SDK 的预览提交版本，但本分支的受控发布插件和会话准备示例使用了尚未发布的新接口，暂时不能仅靠该版本完成全量编译。SDK 尚未发布稳定版本标签。
+
+当前联调需将本分支配套的 `anon-browser-sdk` 放在相邻目录。在仓库根目录创建本地工作区（不要提交 `go.work` / `go.work.sum`）：
+
+```bash
+# 已有 go.work 时用 go work use . ../anon-browser-sdk 补充模块。
+go work init . ../anon-browser-sdk
+```
+
+SDK 新版本发布并更新 `go.mod` 后，再验证不依赖工作区的独立构建。
 
 示例编译、生成和测试都不需要运行桌面应用；真正执行需要已启动的 anon-browser 客户端。API 默认为 `http://127.0.0.1:8787`，可通过 `ANON_BROWSER_API` 覆盖。
 
@@ -12,6 +21,7 @@ Go 1.24+。`go.mod` 已固定公开 SDK 的预览提交版本，独立克隆本�
 
 - `plugins/echo-node/main.go`：共享 SDK 协议、Go 节点描述和最小 handler。
 - `plugins/capability-node/main.go`：类型化读取页面、变量操作、HTTP 调用；不再手写协议结构体、ID 或 stdin/stdout 往返。
+- `plugins/managed-publish/`：上传素材、填写表单、提交并核验业务返回码的闭环示例；新增 SDK 接口尚未发布，当前使用 `go.work` 联调，详见该目录说明。
 - `scenarios/scenarios.go`：新增能力的 Go 编排示例。
 - `scenarios/legacy.go`：原基础示例的 Go 源码，也已按当前 Catalog 修正。
 - `workflows/*.json`、`plugins/*/manifest.json`：生成后的公开交换文件，不直接编辑。
@@ -29,6 +39,7 @@ Manifest 的来源也是 Go。更新插件定义后生成：
 ```bash
 go run ./plugins/echo-node --manifest > plugins/echo-node/manifest.json
 go run ./plugins/capability-node --manifest > plugins/capability-node/manifest.json
+go run ./plugins/managed-publish --manifest > plugins/managed-publish/manifest.json
 ```
 
 ## 插件如何开发
@@ -44,7 +55,7 @@ if err != nil { return err }
 return server.Serve(context.Background(), os.Stdin, os.Stdout)
 ```
 
-完整的 imports、main、Manifest 和权限声明见两个插件目录。通过 `plugin.Describe`、`plugin.Object`、`plugin.String` 用 Go 描述节点；使用 `time.Second`，不需要手算 JSON 中的纳秒值。
+完整的 imports、main、Manifest 和权限声明见各插件目录。通过 `plugin.Describe`、`plugin.Object`、`plugin.String` 用 Go 描述节点；使用 `time.Second`，不需要手算 JSON 中的纳秒值。
 
 ```bash
 ./scripts/package-plugin.sh echo-node
@@ -81,6 +92,7 @@ flow, err := workflow.New("local", "会话任务").Add(
 
 | 文件 | 演示与前置条件 |
 | --- | --- |
+| `ensure-session.json` | 按固定标识首次创建或复用浏览器，再检测登录；不可用时停止，不自动替换会话 |
 | `login-and-keep.json` | 选已有环境 → 打开 → 手动登录、自动检测完成 → 保持会话；首次先创建环境，或用环境创建节点替换选择节点 |
 | `reuse-session.json` | 绑定已保存会话 → 读取固定页面 → Webhook 回传业务内容；替换 session ID、选择器和回调 |
 | `session-script-listener.json` | 绑定会话 → 注册 document_start 脚本 → 导航；先配置事件连接器及启用的 start_run 触发器 |

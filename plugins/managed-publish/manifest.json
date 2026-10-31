@@ -1,0 +1,141 @@
+{
+  "id": "examples.managed_publish",
+  "name": "受控发布示例",
+  "version": "0.1.0",
+  "kind": "automation",
+  "entrypoint": "bin/plugin",
+  "permissions": [
+    "browser.navigate",
+    "browser.file_upload",
+    "browser.network.observe",
+    "browser.page.manage",
+    "storage.read"
+  ],
+  "nodes": [
+    {
+      "metadata": {
+        "type": "examples.managed_publish",
+        "version": 1,
+        "display_name": "上传并提交（示例插件）",
+        "description": "上传素材、填写示例表单并核验业务返回码；不是站点适配器",
+        "category": "插件示例",
+        "security_level": "high_risk",
+        "idempotency": "non_idempotent"
+      },
+      "schema": {
+        "version": 1,
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "body": {
+              "type": "string",
+              "title": "正文"
+            },
+            "files": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "artifact_ref": {
+                    "type": "string",
+                    "title": "素材引用"
+                  }
+                },
+                "required": [
+                  "artifact_ref"
+                ]
+              }
+            },
+            "origin": {
+              "type": "string",
+              "title": "示例页面来源"
+            },
+            "title": {
+              "type": "string",
+              "title": "标题"
+            }
+          },
+          "required": [
+            "origin",
+            "title",
+            "body",
+            "files"
+          ],
+          "additionalProperties": false
+        },
+        "output_schema": {
+          "type": "object",
+          "properties": {
+            "content_id": {
+              "type": "object"
+            },
+            "response_ref": {
+              "type": "string",
+              "title": "响应引用"
+            },
+            "state": {
+              "type": "string",
+              "title": "结果状态"
+            }
+          },
+          "required": [
+            "state"
+          ],
+          "additionalProperties": false
+        },
+        "ports": [
+          {
+            "name": "in",
+            "kind": "input"
+          },
+          {
+            "name": "success",
+            "kind": "output"
+          },
+          {
+            "name": "error",
+            "kind": "error"
+          },
+          {
+            "name": "unconfirmed",
+            "kind": "branch",
+            "description": "提交结果不确定，核实后再决定是否重试"
+          },
+          {
+            "name": "rejected",
+            "kind": "branch",
+            "description": "收到响应但业务返回码未通过"
+          }
+        ]
+      },
+      "policy": {
+        "capabilities": [
+          "browser.navigate",
+          "browser.file_upload",
+          "browser.network.observe",
+          "browser.page.manage",
+          "storage.read"
+        ],
+        "required_permissions": [
+          "browser.navigate",
+          "browser.file_upload",
+          "browser.network.observe",
+          "browser.page.manage",
+          "storage.read"
+        ],
+        "timeouts": {
+          "default": 120000000000,
+          "minimum": 1000000000,
+          "maximum": 900000000000
+        },
+        "resources": {
+          "profile_lease": true,
+          "runtime": true,
+          "active_page": true,
+          "artifact_io": true
+        },
+        "max_attempts": 1
+      }
+    }
+  ]
+}

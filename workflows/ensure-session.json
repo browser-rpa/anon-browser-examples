@@ -1,0 +1,157 @@
+{
+  "project_id": "local",
+  "name": "按固定标识准备浏览器",
+  "description": "首次创建或复用 demo-main；两条可用分支都检查登录。忙碌、关闭或需检查时停止，不自动换浏览器。示例站点与检测条件需替换。",
+  "graph": {
+    "schema_version": 3,
+    "start_node_id": "start",
+    "nodes": [
+      {
+        "id": "start",
+        "type": "core.start",
+        "version": 1,
+        "config": {},
+        "ui": {
+          "x": 40,
+          "y": 160
+        }
+      },
+      {
+        "id": "prepare",
+        "type": "browser.session_ensure",
+        "version": 1,
+        "config": {
+          "session_key": "demo-main",
+          "create_if_missing": true,
+          "name": "演示工作浏览器",
+          "output_variable": "session.id"
+        },
+        "ui": {
+          "x": 280,
+          "y": 160
+        }
+      },
+      {
+        "id": "login",
+        "type": "browser.navigate",
+        "version": 1,
+        "config": {
+          "url": "https://example.test/login"
+        },
+        "ui": {
+          "x": 520,
+          "y": 160
+        }
+      },
+      {
+        "id": "wait",
+        "type": "human.wait",
+        "version": 1,
+        "config": {
+          "mode": "auto",
+          "title": "请在浏览器中完成登录",
+          "timeout_ms": 600000,
+          "stable_ms": 1000,
+          "conditions": [
+            {
+              "kind": "element_visible",
+              "selector": "[data-test=logged-in]"
+            }
+          ]
+        },
+        "ui": {
+          "x": 760,
+          "y": 160
+        }
+      },
+      {
+        "id": "ready",
+        "type": "core.end",
+        "version": 1,
+        "config": {},
+        "ui": {
+          "x": 1000,
+          "y": 160
+        }
+      },
+      {
+        "id": "unavailable",
+        "type": "core.end",
+        "version": 1,
+        "config": {},
+        "ui": {
+          "x": 1240,
+          "y": 160
+        }
+      }
+    ],
+    "edges": [
+      {
+        "from": "start",
+        "from_port": "success",
+        "to": "prepare",
+        "to_port": "in"
+      },
+      {
+        "from": "prepare",
+        "from_port": "created",
+        "to": "login",
+        "to_port": "in"
+      },
+      {
+        "from": "prepare",
+        "from_port": "reused",
+        "to": "login",
+        "to_port": "in"
+      },
+      {
+        "from": "login",
+        "from_port": "success",
+        "to": "wait",
+        "to_port": "in"
+      },
+      {
+        "from": "wait",
+        "from_port": "success",
+        "to": "ready",
+        "to_port": "in"
+      },
+      {
+        "from": "wait",
+        "from_port": "timeout",
+        "to": "unavailable",
+        "to_port": "in"
+      },
+      {
+        "from": "wait",
+        "from_port": "rejected",
+        "to": "unavailable",
+        "to_port": "in"
+      },
+      {
+        "from": "prepare",
+        "from_port": "missing",
+        "to": "unavailable",
+        "to_port": "in"
+      },
+      {
+        "from": "prepare",
+        "from_port": "busy",
+        "to": "unavailable",
+        "to_port": "in"
+      },
+      {
+        "from": "prepare",
+        "from_port": "needs_review",
+        "to": "unavailable",
+        "to_port": "in"
+      },
+      {
+        "from": "prepare",
+        "from_port": "closed",
+        "to": "unavailable",
+        "to_port": "in"
+      }
+    ]
+  }
+}
