@@ -4,16 +4,9 @@ anon-browser 插件与工作流开发示例，基于 [anon-browser-sdk](https://
 
 ## 本地准备
 
-Go 1.24+。`go.mod` 固定了公开 SDK 的预览提交版本，但本分支的受控发布插件和会话准备示例使用了尚未发布的新接口，暂时不能仅靠该版本完成全量编译。SDK 尚未发布稳定版本标签。
+Go 1.24+。`go.mod` 固定公开 SDK 的预览提交版本，包含受控发布插件和会话准备示例所需接口，不需要相邻 SDK 目录。SDK 尚未发布稳定版本标签。可用 `GOWORK=off go test ./...` 验证独立构建。
 
-当前联调需将本分支配套的 `anon-browser-sdk` 放在相邻目录。在仓库根目录创建本地工作区（不要提交 `go.work` / `go.work.sum`）：
-
-```bash
-# 已有 go.work 时用 go work use . ../anon-browser-sdk 补充模块。
-go work init . ../anon-browser-sdk
-```
-
-SDK 新版本发布并更新 `go.mod` 后，再验证不依赖工作区的独立构建。
+同时修改 SDK 和 examples 时可用本地 `go.work` 联调，不要提交机器相关的工作区或 replace。
 
 示例编译、生成和测试都不需要运行桌面应用；真正执行需要已启动的 anon-browser 客户端。API 默认为 `http://127.0.0.1:8787`，可通过 `ANON_BROWSER_API` 覆盖。
 
@@ -21,7 +14,7 @@ SDK 新版本发布并更新 `go.mod` 后，再验证不依赖工作区的独立
 
 - `plugins/echo-node/main.go`：共享 SDK 协议、Go 节点描述和最小 handler。
 - `plugins/capability-node/main.go`：类型化读取页面、变量操作、HTTP 调用；不再手写协议结构体、ID 或 stdin/stdout 往返。
-- `plugins/managed-publish/`：上传素材、填写表单、提交并核验业务返回码的闭环示例；新增 SDK 接口尚未发布，当前使用 `go.work` 联调，详见该目录说明。
+- `plugins/managed-publish/`：上传素材、填写表单、提交并核验业务返回码的闭环示例，详见该目录说明。
 - `scenarios/scenarios.go`：新增能力的 Go 编排示例。
 - `scenarios/legacy.go`：原基础示例的 Go 源码，也已按当前 Catalog 修正。
 - `workflows/*.json`、`plugins/*/manifest.json`：生成后的公开交换文件，不直接编辑。
